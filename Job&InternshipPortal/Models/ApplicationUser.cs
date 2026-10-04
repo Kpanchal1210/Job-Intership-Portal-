@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace JobInternshipPortal.Models
+namespace Job_InternshipPortal.Models
 {
     public class ApplicationUser : IdentityUser
     {

@@ -1,6 +1,6 @@
+using System.Diagnostics;
 using Job_InternshipPortal.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace Job_InternshipPortal.Controllers
 {
