@@ -1,14 +1,20 @@
 using System.Diagnostics;
+<<<<<<< HEAD
 using Job_InternshipPortal.Data;
 using Job_InternshipPortal.Models;
 using Job_InternshipPortal.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+=======
+using Job_InternshipPortal.Models;
+using Microsoft.AspNetCore.Mvc;
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
 namespace Job_InternshipPortal.Controllers
 {
     public class HomeController : Controller
     {
+<<<<<<< HEAD
         private readonly ApplicationDbContext _context;
         private readonly ILogger<HomeController> _logger;
 
@@ -48,6 +54,11 @@ namespace Job_InternshipPortal.Controllers
             }
 
             return View(model);
+=======
+        public IActionResult Index()
+        {
+            return View();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         }
 
         public IActionResult Privacy()

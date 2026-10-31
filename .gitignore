@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## =============================================================================
 ## .gitignore for ASP.NET Core & Visual Studio (.NET 10.0)
 ## =============================================================================
@@ -56,3 +57,10 @@ Job&InternshipPortal/wwwroot/uploads/resumes/*
 # Debug symbols and profiler artifacts
 *.pdb
 *.idb
+=======
+﻿.vs/
+bin/
+obj/
+*.user
+*.suo
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 using Job_InternshipPortal.Data;
 using Job_InternshipPortal.Models;
@@ -5,12 +6,17 @@ using Job_InternshipPortal.Models.ViewModels;
 using Job_InternshipPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+=======
+using Job_InternshipPortal.Data;
+using Job_InternshipPortal.Models;
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Job_InternshipPortal.Controllers
 {
+<<<<<<< HEAD
     [Authorize]
     public class JobApplicationsController : Controller
     {
@@ -289,10 +295,41 @@ namespace Job_InternshipPortal.Controllers
             // ── SECURITY: verify job exists, is active and deadline has not passed ─
             var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == jobApplication.JobId);
             if (job == null)
+=======
+    // ========================================================
+    // 2-Person Project Division: Person 2
+    // Module: Job Application CRUD
+    // ========================================================
+    public class JobApplicationsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public JobApplicationsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // 1. GET: JobApplications
+        public async Task<IActionResult> Index()
+        {
+            var jobApplications = await _context.JobApplications
+                .Include(ja => ja.Job)
+                .Include(ja => ja.Applicant)
+                .ToListAsync();
+
+            return View(jobApplications);
+        }
+
+        // 2. GET: JobApplications/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             {
                 return NotFound();
             }
 
+<<<<<<< HEAD
             if (job.Status != JobStatus.Approved || job.LastDate < DateTime.UtcNow.Date)
             {
                 ModelState.AddModelError(string.Empty,
@@ -359,12 +396,48 @@ namespace Job_InternshipPortal.Controllers
             {
                 ModelState.AddModelError(string.Empty, "You have already applied for this job.");
                 ViewBag.ExistingApplication = existingApp;
+=======
+            var jobApplication = await _context.JobApplications
+                .Include(ja => ja.Job)
+                .Include(ja => ja.Applicant)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (jobApplication == null)
+            {
+                return NotFound();
+            }
+
+            return View(jobApplication);
+        }
+
+        // 3. GET: JobApplications/Create
+        public IActionResult Create()
+        {
+            ViewData["ApplicantId"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["JobId"] = new SelectList(_context.Jobs, "Id", "Title");
+            return View();
+        }
+
+        // 4. POST: JobApplications/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(JobApplication jobApplication)
+        {
+            ModelState.Remove("Job");
+            ModelState.Remove("Applicant");
+            ModelState.Remove("Interviews");
+
+            if (await _context.JobApplications.AnyAsync(a => a.JobId == jobApplication.JobId && a.ApplicantId == jobApplication.ApplicantId))
+            {
+                ModelState.AddModelError(string.Empty, "An application for this job and applicant already exists.");
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             }
 
             if (ModelState.IsValid)
             {
                 _context.Add(jobApplication);
                 await _context.SaveChangesAsync();
+<<<<<<< HEAD
                 TempData["Success"] = "Application submitted successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -376,10 +449,17 @@ namespace Job_InternshipPortal.Controllers
                     .FirstOrDefaultAsync(j => j.Id == jobApplication.JobId);
             }
 
+=======
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["ApplicantId"] = new SelectList(_context.Users, "Id", "UserName", jobApplication.ApplicantId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             ViewData["JobId"] = new SelectList(_context.Jobs, "Id", "Title", jobApplication.JobId);
             return View(jobApplication);
         }
 
+<<<<<<< HEAD
         // ── 5. GET: /JobApplications/Edit/5  (Recruiter or Admin only) ────────
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
         public async Task<IActionResult> Edit(int? id)
@@ -438,11 +518,42 @@ namespace Job_InternshipPortal.Controllers
             if (existingApplication.Job?.Company?.RecruiterId != currentUserId &&
                 !User.IsInRole(UserRoles.Admin))
                 return Forbid();
+=======
+        // 5. GET: JobApplications/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var jobApplication = await _context.JobApplications.FindAsync(id);
+            if (jobApplication == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["ApplicantId"] = new SelectList(_context.Users, "Id", "UserName", jobApplication.ApplicantId);
+            ViewData["JobId"] = new SelectList(_context.Jobs, "Id", "Title", jobApplication.JobId);
+            return View(jobApplication);
+        }
+
+        // 6. POST: JobApplications/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, JobApplication jobApplication)
+        {
+            if (id != jobApplication.Id)
+            {
+                return NotFound();
+            }
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
             ModelState.Remove("Job");
             ModelState.Remove("Applicant");
             ModelState.Remove("Interviews");
 
+<<<<<<< HEAD
             if (jobApplication.Status != existingApplication.Status)
             {
                 var validation = _workflowService.ValidateTransition(existingApplication.Status, jobApplication.Status);
@@ -469,10 +580,13 @@ namespace Job_InternshipPortal.Controllers
                 }
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             if (ModelState.IsValid)
             {
                 try
                 {
+<<<<<<< HEAD
                     // Only allow the Status field to be updated — all other fields
                     // come from the DB record to prevent mass-assignment / over-posting
                     existingApplication.Status = jobApplication.Status;
@@ -571,15 +685,61 @@ namespace Job_InternshipPortal.Controllers
             var isApplicant = jobApplication.ApplicantId == currentUserId;
             if (!isJobOwner && !isApplicant && !User.IsInRole(UserRoles.Admin))
                 return Forbid();
+=======
+                    _context.Update(jobApplication);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!JobApplicationExists(jobApplication.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["ApplicantId"] = new SelectList(_context.Users, "Id", "UserName", jobApplication.ApplicantId);
+            ViewData["JobId"] = new SelectList(_context.Jobs, "Id", "Title", jobApplication.JobId);
+            return View(jobApplication);
+        }
+
+        // 7. GET: JobApplications/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var jobApplication = await _context.JobApplications
+                .Include(ja => ja.Job)
+                .Include(ja => ja.Applicant)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (jobApplication == null)
+            {
+                return NotFound();
+            }
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
             return View(jobApplication);
         }
 
+<<<<<<< HEAD
         // ── 8. POST: /JobApplications/Delete/5 ───────────────────────────────
+=======
+        // 8. POST: JobApplications/Delete/5
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+<<<<<<< HEAD
             var currentUserId  = _userManager.GetUserId(User);
             var jobApplication = await _context.JobApplications
                 .Include(ja => ja.Job).ThenInclude(j => j!.Company)
@@ -663,5 +823,21 @@ namespace Job_InternshipPortal.Controllers
 
         private bool JobApplicationExists(int id)
             => _context.JobApplications.Any(e => e.Id == id);
+=======
+            var jobApplication = await _context.JobApplications.FindAsync(id);
+            if (jobApplication != null)
+            {
+                _context.JobApplications.Remove(jobApplication);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool JobApplicationExists(int id)
+        {
+            return _context.JobApplications.Any(e => e.Id == id);
+        }
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
     }
 }

@@ -1,14 +1,18 @@
 using Job_InternshipPortal.Data;
 using Job_InternshipPortal.Models;
+<<<<<<< HEAD
 using Job_InternshipPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Job_InternshipPortal.Controllers
 {
+<<<<<<< HEAD
 
     [Authorize]
     public class InterviewsController : Controller
@@ -25,11 +29,25 @@ namespace Job_InternshipPortal.Controllers
             _context = context;
             _userManager = userManager;
             _workflowService = workflowService;
+=======
+    // ========================================================
+    // 2-Person Project Division: Person 2
+    // Module: Interview CRUD
+    // ========================================================
+    public class InterviewsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public InterviewsController(ApplicationDbContext context)
+        {
+            _context = context;
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         }
 
         // 1. GET: Interviews
         public async Task<IActionResult> Index()
         {
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var isRecruiter = User.IsInRole(UserRoles.Recruiter);
             var isJobSeeker = User.IsInRole(UserRoles.JobSeeker);
@@ -55,6 +73,15 @@ namespace Job_InternshipPortal.Controllers
             }
 
             var interviews = await query.ToListAsync();
+=======
+            var interviews = await _context.Interviews
+                .Include(i => i.JobApplication)
+                    .ThenInclude(ja => ja!.Job)
+                .Include(i => i.JobApplication)
+                    .ThenInclude(ja => ja!.Applicant)
+                .ToListAsync();
+
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(interviews);
         }
 
@@ -66,11 +93,17 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var interview = await _context.Interviews
                 .Include(i => i.JobApplication)
                     .ThenInclude(ja => ja!.Job)
                         .ThenInclude(j => j!.Company)
+=======
+            var interview = await _context.Interviews
+                .Include(i => i.JobApplication)
+                    .ThenInclude(ja => ja!.Job)
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 .Include(i => i.JobApplication)
                     .ThenInclude(ja => ja!.Applicant)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -80,6 +113,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var isRecruiterOwner = interview.JobApplication?.Job?.Company?.RecruiterId == currentUserId;
             var isApplicant = interview.JobApplication?.ApplicantId == currentUserId;
             if (!isRecruiterOwner && !isApplicant && !User.IsInRole(UserRoles.Admin))
@@ -87,10 +121,13 @@ namespace Job_InternshipPortal.Controllers
                 return Forbid();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(interview);
         }
 
         // 3. GET: Interviews/Create
+<<<<<<< HEAD
         [Authorize(Roles = UserRoles.Recruiter)]
         public async Task<IActionResult> Create(int? applicationId = null)
         {
@@ -184,11 +221,18 @@ namespace Job_InternshipPortal.Controllers
             }
 
             return View(interview);
+=======
+        public IActionResult Create()
+        {
+            PopulateApplicationsDropDownList();
+            return View();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         }
 
         // 4. POST: Interviews/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = UserRoles.Recruiter)]
         public async Task<IActionResult> Create(Interview interview, string? notes)
         {
@@ -288,11 +332,28 @@ namespace Job_InternshipPortal.Controllers
                 PopulateApplicationsDropDownList(interview.JobApplicationId);
             }
 
+=======
+        public async Task<IActionResult> Create(Interview interview)
+        {
+            ModelState.Remove("JobApplication");
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(interview);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            PopulateApplicationsDropDownList(interview.JobApplicationId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(interview);
         }
 
         // 5. GET: Interviews/Edit/5
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -300,6 +361,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var interview = await _context.Interviews
                 .Include(i => i.JobApplication)
@@ -309,11 +371,15 @@ namespace Job_InternshipPortal.Controllers
                     .ThenInclude(ja => ja!.Applicant)
                 .FirstOrDefaultAsync(i => i.Id == id);
 
+=======
+            var interview = await _context.Interviews.FindAsync(id);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             if (interview == null)
             {
                 return NotFound();
             }
 
+<<<<<<< HEAD
             if (interview.JobApplication?.Job?.Company?.RecruiterId != currentUserId && !User.IsInRole(UserRoles.Admin))
             {
                 return Forbid();
@@ -333,13 +399,19 @@ namespace Job_InternshipPortal.Controllers
             ViewBag.JobTitle = interview.JobApplication?.Job?.Title ?? "Job";
 
             // Do not allow changing the associated application from the Edit view; show read-only info instead
+=======
+            PopulateApplicationsDropDownList(interview.JobApplicationId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(interview);
         }
 
         // 6. POST: Interviews/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Edit(int id, Interview interview)
         {
             if (id != interview.Id)
@@ -347,6 +419,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var existingInterview = await _context.Interviews
                 .Include(i => i.JobApplication)
@@ -364,12 +437,15 @@ namespace Job_InternshipPortal.Controllers
                 return Forbid();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             ModelState.Remove("JobApplication");
 
             if (ModelState.IsValid)
             {
                 try
                 {
+<<<<<<< HEAD
                     existingInterview.InterviewDate = interview.InterviewDate;
                     existingInterview.InterviewType = interview.InterviewType;
                     existingInterview.MeetingLink = interview.MeetingLink;
@@ -377,11 +453,18 @@ namespace Job_InternshipPortal.Controllers
                     existingInterview.Status = interview.Status;
 
                     _context.Update(existingInterview);
+=======
+                    _context.Update(interview);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
+<<<<<<< HEAD
                     if (!InterviewExists(existingInterview.Id))
+=======
+                    if (!InterviewExists(interview.Id))
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     {
                         return NotFound();
                     }
@@ -398,7 +481,10 @@ namespace Job_InternshipPortal.Controllers
         }
 
         // 7. GET: Interviews/Delete/5
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -406,11 +492,17 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var interview = await _context.Interviews
                 .Include(i => i.JobApplication)
                     .ThenInclude(ja => ja!.Job)
                         .ThenInclude(j => j!.Company)
+=======
+            var interview = await _context.Interviews
+                .Include(i => i.JobApplication)
+                    .ThenInclude(ja => ja!.Job)
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 .Include(i => i.JobApplication)
                     .ThenInclude(ja => ja!.Applicant)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -420,17 +512,21 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             if (interview.JobApplication?.Job?.Company?.RecruiterId != currentUserId && !User.IsInRole(UserRoles.Admin))
             {
                 return Forbid();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(interview);
         }
 
         // 8. POST: Interviews/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -454,11 +550,23 @@ namespace Job_InternshipPortal.Controllers
             _context.Interviews.Remove(interview);
             await _context.SaveChangesAsync();
 
+=======
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var interview = await _context.Interviews.FindAsync(id);
+            if (interview != null)
+            {
+                _context.Interviews.Remove(interview);
+                await _context.SaveChangesAsync();
+            }
+
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return RedirectToAction(nameof(Index));
         }
 
         private void PopulateApplicationsDropDownList(object? selectedApplication = null)
         {
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var query = _context.JobApplications
                 .Include(ja => ja.Job)
@@ -489,6 +597,14 @@ namespace Job_InternshipPortal.Controllers
                     ja.Id,
                     Display = (ja.Applicant != null ? (ja.Applicant.FullName ?? ja.Applicant.UserName) : "Candidate")
                               + " - " + (ja.Job != null ? ja.Job.Title : "Job")
+=======
+            var applications = _context.JobApplications
+                .Include(ja => ja.Job)
+                .Select(ja => new
+                {
+                    ja.Id,
+                    Display = "Application #" + ja.Id + " (" + (ja.Job != null ? ja.Job.Title : "Job") + ")"
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 })
                 .ToList();
 
@@ -501,4 +617,7 @@ namespace Job_InternshipPortal.Controllers
         }
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169

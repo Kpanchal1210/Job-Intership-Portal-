@@ -1,13 +1,17 @@
 using Job_InternshipPortal.Data;
 using Job_InternshipPortal.Models;
+<<<<<<< HEAD
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Job_InternshipPortal.Controllers
 {
+<<<<<<< HEAD
    
     // Module: Job CRUD (Secured with Company Ownership Authorization)
     public class JobsController : Controller
@@ -82,6 +86,28 @@ namespace Job_InternshipPortal.Controllers
             }
 
             var jobs = await query.OrderByDescending(j => j.CreatedDate).ToListAsync();
+=======
+    // ========================================================
+    // 2-Person Project Division: Person 1
+    // Module: Job CRUD
+    // ========================================================
+    public class JobsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public JobsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // 1. GET: Jobs
+        public async Task<IActionResult> Index()
+        {
+            var jobs = await _context.Jobs
+                .Include(j => j.Company)
+                .ToListAsync();
+
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(jobs);
         }
 
@@ -95,11 +121,14 @@ namespace Job_InternshipPortal.Controllers
 
             var job = await _context.Jobs
                 .Include(j => j.Company)
+<<<<<<< HEAD
                     .ThenInclude(c => c!.Recruiter)
                 .Include(j => j.JobApplications)
                     .ThenInclude(ja => ja.Applicant)
                 .Include(j => j.JobApplications)
                     .ThenInclude(ja => ja.Interviews)
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (job == null)
@@ -107,6 +136,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             var isAdmin = User.IsInRole(UserRoles.Admin);
             var isRecruiter = User.IsInRole(UserRoles.Recruiter) || User.IsInRole("Company") || User.IsInRole("Recruiter");
@@ -156,10 +186,13 @@ namespace Job_InternshipPortal.Controllers
                     .ToDictionary(g => g.Key, g => $"{g.First().JobTitle} at {g.First().CompanyName}");
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(job);
         }
 
         // 3. GET: Jobs/Create
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
         public async Task<IActionResult> Create()
         {
@@ -190,11 +223,18 @@ namespace Job_InternshipPortal.Controllers
                 ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName");
                 return View();
             }
+=======
+        public IActionResult Create()
+        {
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName");
+            return View();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         }
 
         // 4. POST: Jobs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
         public async Task<IActionResult> Create(Job job)
         {
@@ -232,12 +272,17 @@ namespace Job_InternshipPortal.Controllers
                 }
             }
 
+=======
+        public async Task<IActionResult> Create(Job job)
+        {
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             ModelState.Remove("Company");
             ModelState.Remove("JobApplications");
             ModelState.Remove("SavedJobs");
 
             if (ModelState.IsValid)
             {
+<<<<<<< HEAD
                 job.CreatedDate = DateTime.UtcNow;
                 _context.Add(job);
                 await _context.SaveChangesAsync();
@@ -258,11 +303,22 @@ namespace Job_InternshipPortal.Controllers
                 ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName", job.CompanyId);
             }
 
+=======
+                _context.Add(job);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName", job.CompanyId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(job);
         }
 
         // 5. GET: Jobs/Edit/5
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -270,6 +326,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(currentUserId))
             {
@@ -280,11 +337,15 @@ namespace Job_InternshipPortal.Controllers
                 .Include(j => j.Company)
                 .FirstOrDefaultAsync(j => j.Id == id);
 
+=======
+            var job = await _context.Jobs.FindAsync(id);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             if (job == null)
             {
                 return NotFound();
             }
 
+<<<<<<< HEAD
             // Ownership check: Job -> Company -> RecruiterId == currentUserId
             if (job.Company == null || (job.Company.RecruiterId != currentUserId && !User.IsInRole(UserRoles.Admin)))
             {
@@ -297,13 +358,19 @@ namespace Job_InternshipPortal.Controllers
                     : _context.Companies.Where(c => c.RecruiterId == currentUserId),
                 "Id", "CompanyName", job.CompanyId);
 
+=======
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName", job.CompanyId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(job);
         }
 
         // 6. POST: Jobs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Edit(int id, Job job)
         {
             if (id != job.Id)
@@ -311,6 +378,7 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(currentUserId))
             {
@@ -332,6 +400,8 @@ namespace Job_InternshipPortal.Controllers
                 return Forbid();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             ModelState.Remove("Company");
             ModelState.Remove("JobApplications");
             ModelState.Remove("SavedJobs");
@@ -340,6 +410,7 @@ namespace Job_InternshipPortal.Controllers
             {
                 try
                 {
+<<<<<<< HEAD
                     // Update editable fields while preserving company ownership
                     existingJob.Title = job.Title;
                     existingJob.Description = job.Description;
@@ -362,6 +433,14 @@ namespace Job_InternshipPortal.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!JobExists(existingJob.Id))
+=======
+                    _context.Update(job);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!JobExists(job.Id))
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     {
                         return NotFound();
                     }
@@ -370,6 +449,7 @@ namespace Job_InternshipPortal.Controllers
                         throw;
                     }
                 }
+<<<<<<< HEAD
             }
 
             ViewData["CompanyId"] = new SelectList(
@@ -378,11 +458,20 @@ namespace Job_InternshipPortal.Controllers
                     : _context.Companies.Where(c => c.RecruiterId == currentUserId),
                 "Id", "CompanyName", existingJob.CompanyId);
 
+=======
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "CompanyName", job.CompanyId);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(job);
         }
 
         // 7. GET: Jobs/Delete/5
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -390,12 +479,15 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             var currentUserId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(currentUserId))
             {
                 return Challenge();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             var job = await _context.Jobs
                 .Include(j => j.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -405,18 +497,22 @@ namespace Job_InternshipPortal.Controllers
                 return NotFound();
             }
 
+<<<<<<< HEAD
             // Ownership check: Job -> Company -> RecruiterId == currentUserId
             if (job.Company == null || (job.Company.RecruiterId != currentUserId && !User.IsInRole(UserRoles.Admin)))
             {
                 return Forbid();
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(job);
         }
 
         // 8. POST: Jobs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+<<<<<<< HEAD
         [Authorize(Roles = $"{UserRoles.Recruiter},{UserRoles.Admin}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -467,6 +563,15 @@ namespace Job_InternshipPortal.Controllers
             if (User.IsInRole(UserRoles.Admin))
             {
                 return RedirectToAction("Jobs", "Admin");
+=======
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var job = await _context.Jobs.FindAsync(id);
+            if (job != null)
+            {
+                _context.Jobs.Remove(job);
+                await _context.SaveChangesAsync();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             }
 
             return RedirectToAction(nameof(Index));
@@ -478,4 +583,7 @@ namespace Job_InternshipPortal.Controllers
         }
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169

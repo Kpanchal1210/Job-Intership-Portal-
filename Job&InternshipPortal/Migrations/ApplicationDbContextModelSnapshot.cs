@@ -105,10 +105,13 @@ namespace Job_InternshipPortal.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+<<<<<<< HEAD
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.Property<string>("Location")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -117,10 +120,13 @@ namespace Job_InternshipPortal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+<<<<<<< HEAD
                     b.Property<string>("Website")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.HasKey("Id");
 
                     b.HasIndex("RecruiterId")
@@ -146,17 +152,23 @@ namespace Job_InternshipPortal.Migrations
                     b.Property<int>("JobApplicationId")
                         .HasColumnType("int");
 
+<<<<<<< HEAD
                     b.Property<string>("Location")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.Property<string>("MeetingLink")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+<<<<<<< HEAD
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.HasKey("Id");
 
                     b.HasIndex("JobApplicationId");
@@ -175,9 +187,12 @@ namespace Job_InternshipPortal.Migrations
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
+<<<<<<< HEAD
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(3000)
@@ -193,6 +208,7 @@ namespace Job_InternshipPortal.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+<<<<<<< HEAD
                     b.Property<int?>("MaxApplicants")
                         .HasColumnType("int");
 
@@ -205,6 +221,8 @@ namespace Job_InternshipPortal.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.Property<decimal?>("Salary")
                         .HasColumnType("decimal(18,2)");
 
@@ -246,9 +264,12 @@ namespace Job_InternshipPortal.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+<<<<<<< HEAD
                     b.Property<DateTime?>("SelectedDate")
                         .HasColumnType("datetime2");
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -256,8 +277,12 @@ namespace Job_InternshipPortal.Migrations
 
                     b.HasIndex("ApplicantId");
 
+<<<<<<< HEAD
                     b.HasIndex("JobId", "ApplicantId")
                         .IsUnique();
+=======
+                    b.HasIndex("JobId");
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
                     b.ToTable("JobApplications");
                 });
@@ -284,8 +309,12 @@ namespace Job_InternshipPortal.Migrations
 
                     b.HasIndex("ApplicantId");
 
+<<<<<<< HEAD
                     b.HasIndex("JobId", "ApplicantId")
                         .IsUnique();
+=======
+                    b.HasIndex("JobId");
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
                     b.ToTable("SavedJobs");
                 });

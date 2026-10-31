@@ -1,12 +1,16 @@
 using Job_InternshipPortal.Data;
 using Job_InternshipPortal.Models;
+<<<<<<< HEAD
 using Job_InternshipPortal.Services;
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+<<<<<<< HEAD
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -36,10 +40,26 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
     // ── User settings ────────────────────────────────────────────────────
     options.User.RequireUniqueEmail = true;
+=======
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+<<<<<<< HEAD
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath       = "/Account/Login";
@@ -63,6 +83,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IApplicationWorkflowService, ApplicationWorkflowService>();
+=======
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
 var app = builder.Build();
 
@@ -70,10 +94,16 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+<<<<<<< HEAD
     app.UseHttpsRedirection();
 }
 
 app.UseStaticFiles();
+=======
+}
+
+app.UseHttpsRedirection();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
 app.UseRouting();
 
@@ -87,6 +117,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+<<<<<<< HEAD
 // Initialize database and seed initial demo data
 using (var scope = app.Services.CreateScope())
 {
@@ -127,5 +158,8 @@ if (args.Length > 0 && args.Contains("--run-tests"))
     var exitCode = await Job_InternshipPortal.Testing.PortalTestRunner.RunAllTestsAsync(app.Services);
     Environment.Exit(exitCode);
 }
+=======
+app.MapRazorPages();
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
 app.Run();

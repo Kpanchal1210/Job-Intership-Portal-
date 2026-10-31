@@ -1,5 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+<<<<<<< HEAD
+=======
+
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 namespace Job_InternshipPortal.Models
 {
     public class Interview
@@ -23,8 +27,11 @@ namespace Job_InternshipPortal.Models
 
         [StringLength(200)]
         public string? Location { get; set; }
+<<<<<<< HEAD
 
         // Track interview lifecycle (scheduled, completed, cancelled)
         public InterviewStatus Status { get; set; } = InterviewStatus.Scheduled;
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
     }
 }

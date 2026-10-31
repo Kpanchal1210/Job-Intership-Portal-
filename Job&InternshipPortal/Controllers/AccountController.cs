@@ -45,6 +45,7 @@ namespace Job_InternshipPortal.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
 
+<<<<<<< HEAD
             // ── Server-side role allowlist: ONLY JobSeeker and Recruiter are
             //    permitted through public registration. Any other value
             //    (including "Admin") is rejected outright here — the ternary
@@ -54,6 +55,8 @@ namespace Job_InternshipPortal.Controllers
                 ModelState.AddModelError("Role", "Invalid account type selected.");
             }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -68,17 +71,28 @@ namespace Job_InternshipPortal.Controllers
 
             var user = new ApplicationUser
             {
+<<<<<<< HEAD
                 UserName  = model.Email,
                 Email     = model.Email,
                 FullName  = model.FullName
+=======
+                UserName = model.Email,
+                Email = model.Email,
+                FullName = model.FullName
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
+<<<<<<< HEAD
                 // Allowlisted role — Admin can never reach here
                 var roleName = model.Role == UserRoles.Recruiter ? UserRoles.Recruiter : UserRoles.JobSeeker;
 
+=======
+                // Ensure role exists
+                var roleName = model.Role == UserRoles.Recruiter ? UserRoles.Recruiter : UserRoles.JobSeeker;
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 if (!await _roleManager.RoleExistsAsync(roleName))
                 {
                     await _roleManager.CreateAsync(new IdentityRole(roleName));
@@ -86,7 +100,11 @@ namespace Job_InternshipPortal.Controllers
 
                 await _userManager.AddToRoleAsync(user, roleName);
 
+<<<<<<< HEAD
                 _logger.LogInformation("User {Email} registered with role {Role}.", user.Email, roleName);
+=======
+                _logger.LogInformation("User created a new account with password. Role: {Role}", roleName);
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 TempData["Success"] = $"Welcome to Job & Internship Portal, {user.FullName}!";
@@ -98,10 +116,17 @@ namespace Job_InternshipPortal.Controllers
 
                 if (roleName == UserRoles.Recruiter)
                 {
+<<<<<<< HEAD
                     return RedirectToAction("Dashboard", "Companies");
                 }
 
                 return RedirectToAction("Dashboard", "JobApplications");
+=======
+                    return RedirectToAction("Index", "Companies");
+                }
+
+                return RedirectToAction("Index", "Jobs");
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             }
 
             foreach (var error in result.Errors)
@@ -137,21 +162,31 @@ namespace Job_InternshipPortal.Controllers
                 return View(model);
             }
 
+<<<<<<< HEAD
             // Look up user first so we can return a generic error if not found,
             // without exposing whether the email exists (timing-safe: same message in both branches)
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Generic message — do not reveal that the email is unregistered
+=======
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 ModelState.AddModelError(string.Empty, "Invalid login credentials. Please check your email and password.");
                 return View(model);
             }
 
+<<<<<<< HEAD
             // lockoutOnFailure: true — respects the lockout policy configured in Program.cs
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             var result = await _signInManager.PasswordSignInAsync(
                 user.UserName!,
                 model.Password,
                 model.RememberMe,
+<<<<<<< HEAD
                 lockoutOnFailure: true);
 
             if (result.Succeeded)
@@ -160,12 +195,22 @@ namespace Job_InternshipPortal.Controllers
                 TempData["Success"] = $"Welcome back, {user.FullName}!";
 
                 // Validate ReturnUrl to prevent open-redirect attacks
+=======
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in.");
+                TempData["Success"] = $"Welcome back, {user.FullName}!";
+
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
                 var targetUrl = returnUrl ?? model.ReturnUrl;
                 if (!string.IsNullOrEmpty(targetUrl) && Url.IsLocalUrl(targetUrl))
                 {
                     return Redirect(targetUrl);
                 }
 
+<<<<<<< HEAD
                 if (await _userManager.IsInRoleAsync(user, UserRoles.Admin))
                 {
                     return RedirectToAction("Dashboard", "Admin");
@@ -187,6 +232,12 @@ namespace Job_InternshipPortal.Controllers
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login credentials. Please check your email and password.");
+=======
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt. Please check your credentials.");
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
             return View(model);
         }
 

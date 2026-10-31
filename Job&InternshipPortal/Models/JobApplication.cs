@@ -29,8 +29,11 @@ namespace Job_InternshipPortal.Models
         [Required]
         public ApplicationStatus Status { get; set; } = ApplicationStatus.Applied;
 
+<<<<<<< HEAD
         public DateTime? SelectedDate { get; set; }
 
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
         public ICollection<Interview> Interviews { get; set; } = new List<Interview>();
     }
 }

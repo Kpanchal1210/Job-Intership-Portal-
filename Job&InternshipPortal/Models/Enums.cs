@@ -30,6 +30,7 @@ namespace Job_InternshipPortal.Models
         Online,
         Offline
     }
+<<<<<<< HEAD
 
     public enum InterviewStatus
     {
@@ -37,4 +38,6 @@ namespace Job_InternshipPortal.Models
         Completed,
         Cancelled
     }
+=======
+>>>>>>> b82863a76e709b1c678db16168ef0cd6843c8169
 }
