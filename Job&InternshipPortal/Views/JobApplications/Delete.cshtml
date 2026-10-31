@@ -1,0 +1,34 @@
+@model Job_InternshipPortal.Models.JobApplication
+@{
+    ViewData["Title"] = "Delete Application";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card bg-white border rounded-3 shadow-sm p-4 text-center">
+                <div class="card-body">
+                    <h3 class="fw-bold text-danger mb-3">Delete Application</h3>
+                    <p class="text-muted mb-4">Are you sure you want to delete this application?</p>
+
+                    <div class="p-3 bg-light rounded-3 border mb-4 text-start">
+                        <p class="mb-1"><strong>Job:</strong> @(Model.Job?.Title ?? "Job")</p>
+                        <p class="mb-0"><strong>Candidate:</strong> @(Model.Applicant?.FullName ?? Model.Applicant?.UserName ?? "Applicant")</p>
+                    </div>
+
+                    <form asp-controller="JobApplications" asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-danger px-4">
+                                Delete
+                            </button>
+                            <a asp-controller="JobApplications" asp-action="Index" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

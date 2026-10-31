@@ -1,0 +1,152 @@
+@model Job_InternshipPortal.Models.Interview
+@{
+    var isRecruiter = User.Identity != null && User.Identity.IsAuthenticated &&
+        (User.IsInRole("Company") || User.IsInRole("Recruiter") || User.IsInRole(UserRoles.Recruiter));
+    ViewData["Title"] = "Interview Details";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @TempData["Info"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card bg-white border rounded-3 shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-4">Interview Details</h3>
+
+                    @if (Model.JobApplication?.Status == ApplicationStatus.Selected)
+                    {
+                        <div class="alert alert-success border-0 rounded-3 shadow-sm d-flex align-items-center gap-3 mb-4 p-3">
+                            <i class="bi bi-trophy-fill fs-3 text-success"></i>
+                            <div>
+                                <div class="fw-bold text-success">Candidate Selected!</div>
+                                <div class="small text-muted">This interview process concluded successfully and the candidate was hired for this position.</div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Job -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-1">Job</h6>
+                        <p class="text-dark fs-5 fw-semibold mb-0">@(Model.JobApplication?.Job?.Title ?? "N/A")</p>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-1">Company</h6>
+                        <p class="text-dark fs-6 mb-0">@(Model.JobApplication?.Job?.Company?.CompanyName ?? "Company")</p>
+                    </div>
+
+                    @if (isRecruiter)
+                    {
+                        <!-- Candidate -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Candidate</h6>
+                            <p class="text-dark fs-6 fw-semibold mb-0">@(Model.JobApplication?.Applicant?.FullName ?? Model.JobApplication?.Applicant?.UserName ?? "N/A")</p>
+                        </div>
+                    }
+
+                    <!-- Date -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-1">Date</h6>
+                        <p class="text-dark fs-6 mb-0">@Model.InterviewDate.ToString("dd MMMM yyyy")</p>
+                    </div>
+
+                    <!-- Time -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-1">Time</h6>
+                        <p class="text-dark fs-6 mb-0">@Model.InterviewDate.ToString("hh:mm tt")</p>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-1">Status</h6>
+                        <p class="mb-0">
+                            @{
+                                var status = Model.Status;
+                                var badgeClass = status == InterviewStatus.Completed ? "bg-success-subtle text-success-emphasis" : status == InterviewStatus.Cancelled ? "bg-danger-subtle text-danger-emphasis" : "bg-info-subtle text-info-emphasis";
+                                var statusText = status == InterviewStatus.Completed ? "Completed" : status == InterviewStatus.Cancelled ? "Cancelled" : "Scheduled";
+                            }
+                            <span class="badge @badgeClass border px-3 py-2 fs-6">
+                                @statusText
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Additional Details -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Additional Details</h6>
+                        <p class="mb-2"><strong>Interview Mode:</strong> @Model.InterviewType</p>
+
+                        @if (Model.InterviewType == InterviewType.Online && !string.IsNullOrEmpty(Model.MeetingLink))
+                        {
+                            <p class="mb-2">
+                                <strong>Meeting Link:</strong>
+                                <a href="@Model.MeetingLink" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                    @Model.MeetingLink
+                                </a>
+                            </p>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.Location))
+                        {
+                            <p class="mb-2">
+                                <strong>@(Model.InterviewType == InterviewType.Online ? "Notes / Instructions" : "Location"):</strong> @Model.Location
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-3 border-top d-flex flex-wrap gap-2">
+                        @if (isRecruiter)
+                        {
+                            @if (Model.JobApplicationId > 0)
+                            {
+                                <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@Model.JobApplicationId" class="btn btn-outline-primary px-4">
+                                    View Application
+                                </a>
+                            }
+                            @if (Model.JobApplication?.Status != ApplicationStatus.Selected && Model.JobApplication?.Status != ApplicationStatus.Rejected && Model.Status == InterviewStatus.Scheduled)
+                            {
+                                <a asp-controller="Interviews" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">
+                                    Edit
+                                </a>
+                                <a asp-controller="Interviews" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger px-4">
+                                    Delete
+                                </a>
+                            }
+                            <a asp-controller="Interviews" asp-action="Index" class="btn btn-secondary px-4">
+                                Back to Interviews
+                            </a>
+                        }
+                        else
+                        {
+                            @if (Model.JobApplicationId > 0)
+                            {
+                                <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@Model.JobApplicationId" class="btn btn-outline-primary px-4">
+                                    View Application
+                                </a>
+                            }
+                            <a asp-controller="Interviews" asp-action="Index" class="btn btn-secondary px-4">
+                                Back to Interviews
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

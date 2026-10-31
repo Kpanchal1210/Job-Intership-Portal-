@@ -1,0 +1,58 @@
+## =============================================================================
+## .gitignore for ASP.NET Core & Visual Studio (.NET 10.0)
+## =============================================================================
+
+# Build results and intermediate binaries
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+build/
+
+# Visual Studio temporary files, user options and caches
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+*.launch
+*.resharper
+*.vsp
+*.vspx
+*.sap
+.vscode/
+
+# Rider & JetBrains
+.idea/
+*.sln.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Test results and coverage
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.json
+coverage*.xml
+
+# Runtime temporary and lock files
+*.tmp
+*.temp
+*.log
+*.pid
+*.seed
+*.lock
+
+# User uploaded files (keep sample templates and folder structure via .gitkeep)
+Job&InternshipPortal/wwwroot/uploads/resumes/*
+!Job&InternshipPortal/wwwroot/uploads/resumes/.gitkeep
+!Job&InternshipPortal/wwwroot/uploads/resumes/sample*.pdf
+
+# Debug symbols and profiler artifacts
+*.pdb
+*.idb

@@ -1,0 +1,337 @@
+@model Job_InternshipPortal.Models.JobApplication
+@{
+    var isRecruiter = User.Identity != null && User.Identity.IsAuthenticated &&
+        (User.IsInRole("Company") || User.IsInRole("Recruiter") || User.IsInRole(UserRoles.Recruiter));
+    var isJobSeeker = User.Identity != null && User.Identity.IsAuthenticated &&
+        (User.IsInRole("JobSeeker") || User.IsInRole(UserRoles.JobSeeker));
+    var isAdmin = User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole(UserRoles.Admin);
+
+    ViewData["Title"] = "Application Details";
+    var hasInterview = Model.Interviews != null && Model.Interviews.Any();
+    var scheduledInterview = hasInterview ? Model.Interviews!.First() : null;
+
+    var (statusBg, statusFg) = Model.Status switch
+    {
+        ApplicationStatus.Selected    => ("bg-success-subtle", "text-success-emphasis"),
+        ApplicationStatus.Rejected    => ("bg-danger-subtle",  "text-danger-emphasis"),
+        ApplicationStatus.Shortlisted => ("bg-warning-subtle", "text-warning-emphasis"),
+        ApplicationStatus.Interview   => ("bg-info-subtle",    "text-info-emphasis"),
+        ApplicationStatus.UnderReview => ("bg-primary-subtle", "text-primary-emphasis"),
+        _                             => ("bg-secondary-subtle","text-secondary-emphasis")
+    };
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="JobApplications" asp-action="Index" class="text-decoration-none">Applications</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Details</li>
+                </ol>
+            </nav>
+
+            <div class="card bg-white border rounded-4 shadow-sm p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-3 border-bottom">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1">Application Details</h3>
+                        <span class="text-muted small">Submitted on @Model.AppliedDate.ToString("MMMM dd, yyyy")</span>
+                    </div>
+                    <div>
+                        <span class="badge @statusBg @statusFg border px-3 py-2 fs-6">
+                            @Model.Status
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Recruitment Pipeline Progression Stepper -->
+                <div class="card border-0 bg-light rounded-3 p-3 mb-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        @{
+                            var stageOrder = new[] { ApplicationStatus.Applied, ApplicationStatus.UnderReview, ApplicationStatus.Shortlisted, ApplicationStatus.Interview, ApplicationStatus.Selected };
+                            var currentIdx = Model.Status == ApplicationStatus.Rejected ? -1 : Array.IndexOf(stageOrder, Model.Status);
+                        }
+                        @for (int i = 0; i < stageOrder.Length; i++)
+                        {
+                            var st = stageOrder[i];
+                            var isCurrent = Model.Status == st;
+                            var isPassed = currentIdx > i;
+                            var pillClass = isCurrent ? "bg-primary text-white fw-bold shadow-sm" : isPassed ? "bg-success text-white" : "bg-white text-muted border";
+                            var iconClass = isPassed ? "bi-check-circle-fill" : isCurrent ? "bi-record-circle-fill" : "bi-circle";
+                            var label = st switch
+                            {
+                                ApplicationStatus.Applied => "1. Applied",
+                                ApplicationStatus.UnderReview => "2. Under Review",
+                                ApplicationStatus.Shortlisted => "3. Shortlisted",
+                                ApplicationStatus.Interview => "4. Interview",
+                                ApplicationStatus.Selected => "5. Selected",
+                                _ => st.ToString()
+                            };
+
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge @pillClass px-3 py-2" style="font-size: 0.85rem;">
+                                    <i class="bi @iconClass me-1"></i> @label
+                                </span>
+                                @if (i < stageOrder.Length - 1)
+                                {
+                                    <i class="bi bi-chevron-right text-muted small d-none d-md-inline"></i>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (ViewBag.AlreadySelectedForJob != null && Model.Status != ApplicationStatus.Selected)
+                {
+                    <div class="alert alert-warning border-0 rounded-3 shadow-sm d-flex flex-wrap align-items-center mb-4 p-3 gap-2">
+                        <i class="bi bi-lock-fill fs-3 text-warning"></i>
+                        <div>
+                            <div class="fw-bold text-dark mb-1">Single Placement Policy: Candidate Already Selected</div>
+                            <div class="small text-muted">
+                                This candidate has already been selected for <strong>@ViewBag.AlreadySelectedForJob</strong>. Under the portal's single placement policy, this student cannot be selected for multiple jobs.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Status == ApplicationStatus.Selected)
+                {
+                    <div class="alert alert-success border-0 rounded-3 shadow-sm d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-trophy-fill fs-3 text-success"></i>
+                            <div>
+                                <div class="fw-bold text-success mb-1">Candidate Selected!</div>
+                                <div class="small text-muted">
+                                    @(Model.Applicant?.FullName ?? "The candidate") has been officially selected for this position@(Model.SelectedDate.HasValue ? $" on {Model.SelectedDate.Value.ToString("MMMM dd, yyyy")}" : "").
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge bg-success text-white px-3 py-2 fs-6">Selected Final Hire</span>
+                    </div>
+                }
+                else if (Model.Status == ApplicationStatus.Rejected)
+                {
+                    <div class="alert alert-danger border-0 rounded-3 shadow-sm d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-x-circle-fill fs-3 text-danger"></i>
+                            <div>
+                                <div class="fw-bold text-danger mb-1">Application Rejected</div>
+                                <div class="small text-muted">
+                                    This application has been closed and is no longer under consideration.
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge bg-danger text-white px-3 py-2 fs-6">Rejected</span>
+                    </div>
+                }
+                else if (Model.Status == ApplicationStatus.Interview && hasInterview && scheduledInterview != null)
+                {
+                    <div class="alert alert-info border-0 rounded-3 shadow-sm d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 gap-2">
+                        <div>
+                            <div class="fw-bold text-dark mb-1"><i class="bi bi-calendar-check-fill text-primary"></i> Interview Scheduled</div>
+                            <div class="small text-muted">
+                                Date: <strong>@scheduledInterview.InterviewDate.ToString("dd MMMM yyyy, hh:mm tt")</strong> &bull; Mode: <strong>@scheduledInterview.InterviewType</strong>
+                            </div>
+                        </div>
+                        <a asp-controller="Interviews" asp-action="Details" asp-route-id="@scheduledInterview.Id" class="btn btn-primary btn-sm px-3">
+                            View Interview Details
+                        </a>
+                    </div>
+                }
+
+                <div class="row g-4 mb-4">
+                    <!-- Candidate -->
+                    <div class="col-12 col-sm-6">
+                        <label class="fw-semibold text-secondary small text-uppercase">Applicant / Candidate</label>
+                        <p class="text-dark fs-5 fw-bold mb-0">
+                            <i class="bi bi-person text-primary"></i> @(Model.Applicant?.FullName ?? Model.Applicant?.UserName ?? "Candidate")
+                        </p>
+                        @if (!string.IsNullOrEmpty(Model.Applicant?.Email))
+                        {
+                            <span class="text-muted small">@Model.Applicant.Email</span>
+                        }
+                    </div>
+
+                    <!-- Job Title -->
+                    <div class="col-12 col-sm-6">
+                        <label class="fw-semibold text-secondary small text-uppercase">Job Opening</label>
+                        <p class="text-dark fs-5 fw-bold mb-0">
+                            <i class="bi bi-briefcase text-primary"></i> @(Model.Job?.Title ?? "Position")
+                        </p>
+                        <span class="text-muted small">@(Model.Job?.JobType.ToString() ?? "Full Time")</span>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="col-12 col-sm-6">
+                        <label class="fw-semibold text-secondary small text-uppercase">Company</label>
+                        <p class="text-dark fs-6 fw-semibold mb-0">
+                            <i class="bi bi-building text-primary"></i> @(Model.Job?.Company?.CompanyName ?? "Company")
+                        </p>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="col-12 col-sm-6">
+                        <label class="fw-semibold text-secondary small text-uppercase">Location</label>
+                        <p class="text-dark fs-6 mb-0">
+                            <i class="bi bi-geo-alt text-primary"></i> @(Model.Job?.Location ?? "Not Specified")
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Resume Section -->
+                <div class="card border rounded-3 p-3 bg-light mb-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-pdf text-danger"></i> Candidate Resume / CV</h6>
+                            <p class="text-muted small mb-0">Submitted document for evaluation</p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.ResumePath))
+                        {
+                            <a href="@Model.ResumePath" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm px-3">
+                                <i class="bi bi-download"></i> View / Download Resume
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary border">No resume attached</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="pt-3 border-top d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                    <div>
+                        <a asp-controller="JobApplications" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Applications
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        @if (isRecruiter || isAdmin)
+                        {
+                            @if (ViewBag.AlreadySelectedForJob != null && Model.Status != ApplicationStatus.Selected)
+                            {
+                                <span class="badge bg-secondary text-white px-3 py-2 fs-6">
+                                    <i class="bi bi-lock-fill me-1"></i> Application Locked (Candidate Placed in @ViewBag.AlreadySelectedForJob)
+                                </span>
+                            }
+                            else
+                            {
+                                @* 1. When Applied: Can Review, Shortlist, or Reject *@
+                                @if (Model.Status == ApplicationStatus.Applied)
+                                {
+                                    <form asp-controller="Companies" asp-action="MarkUnderReview" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="bi bi-search"></i> Mark Under Review
+                                        </button>
+                                    </form>
+                                    <form asp-controller="Companies" asp-action="ShortlistCandidate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-warning text-dark fw-semibold">
+                                            <i class="bi bi-star-fill"></i> Shortlist Candidate
+                                        </button>
+                                    </form>
+                                }
+
+                                @* 2. When Under Review: Can Shortlist, Interview, or Reject *@
+                                @if (Model.Status == ApplicationStatus.UnderReview)
+                                {
+                                    <form asp-controller="Companies" asp-action="ShortlistCandidate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-warning text-dark fw-semibold">
+                                            <i class="bi bi-star-fill"></i> Shortlist Candidate
+                                        </button>
+                                    </form>
+                                    <a asp-controller="Interviews" asp-action="Create" asp-route-applicationId="@Model.Id" class="btn btn-outline-info text-dark">
+                                        <i class="bi bi-calendar-plus"></i> Schedule Interview
+                                    </a>
+                                }
+
+                                @* 3. When Shortlisted: Can Schedule Interview, Select Candidate, or Reject *@
+                                @if (Model.Status == ApplicationStatus.Shortlisted)
+                                {
+                                    @if (!hasInterview)
+                                    {
+                                        <a asp-controller="Interviews" asp-action="Create" asp-route-applicationId="@Model.Id" class="btn btn-outline-info text-dark">
+                                            <i class="bi bi-calendar-plus"></i> Schedule Interview
+                                        </a>
+                                    }
+                                    <form asp-controller="Companies" asp-action="SelectCandidate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-success fw-semibold" onclick="return confirm('Are you sure you want to select @(Model.Applicant?.FullName ?? "this candidate") for this position?');">
+                                            <i class="bi bi-check-circle-fill"></i> Select Candidate
+                                        </button>
+                                    </form>
+                                }
+
+                                @* 4. When Interview Stage: Can View Interview, Select Candidate, or Reject *@
+                                @if (Model.Status == ApplicationStatus.Interview)
+                                {
+                                    @if (hasInterview && scheduledInterview != null)
+                                    {
+                                        <a asp-controller="Interviews" asp-action="Details" asp-route-id="@scheduledInterview.Id" class="btn btn-outline-info text-dark">
+                                            <i class="bi bi-calendar-check"></i> View Interview Details
+                                        </a>
+                                    }
+                                    <form asp-controller="Companies" asp-action="SelectCandidate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-success fw-semibold" onclick="return confirm('Are you sure you want to select @(Model.Applicant?.FullName ?? "this candidate") for this position?');">
+                                            <i class="bi bi-check-circle-fill"></i> Select Candidate
+                                        </button>
+                                    </form>
+                                }
+
+                                @* Reject button for all non-terminal stages *@
+                                @if (Model.Status != ApplicationStatus.Selected && Model.Status != ApplicationStatus.Rejected)
+                                {
+                                    <form asp-controller="Companies" asp-action="RejectCandidate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to reject this candidate?');">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </form>
+                                }
+                            }
+
+                            @* 5. When Selected: Quick link to company's Selected Candidates list *@
+                            @if (Model.Status == ApplicationStatus.Selected)
+                            {
+                                <a asp-controller="Companies" asp-action="SelectedCandidates" class="btn btn-outline-success">
+                                    <i class="bi bi-trophy"></i> View in Selected Candidates
+                                </a>
+                            }
+
+                            @* Manual Status update dropdown for non-terminal applications *@
+                            @if (Model.Status != ApplicationStatus.Selected && Model.Status != ApplicationStatus.Rejected && ViewBag.AlreadySelectedForJob == null)
+                            {
+                                <a asp-controller="JobApplications" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                    <i class="bi bi-sliders"></i> Edit Status
+                                </a>
+                            }
+                        }
+                        @if (Model.Job != null)
+                        {
+                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@Model.JobId" class="btn btn-outline-primary">
+                                View Job Details
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,148 @@
+@model IEnumerable<Job_InternshipPortal.Models.Job>
+@{
+    ViewData["Title"] = "Manage Jobs";
+}
+
+<div class="container py-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Manage Jobs</h2>
+            <p class="text-muted mb-0">View and manage all job postings across all recruiters.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary">
+                + Post Job
+            </a>
+            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary">
+                &larr; Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card bg-white border rounded-3 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light border-bottom">
+                        <tr>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Job Title</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Company</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Recruiter</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Job Type</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Location</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Status</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="py-3 px-4 fw-semibold text-dark">
+                                    @item.Title
+                                </td>
+                                <td class="py-3 px-4 text-muted">
+                                    @(item.Company?.CompanyName ?? "N/A")
+                                </td>
+                                <td class="py-3 px-4 text-muted">
+                                    @(item.Company?.Recruiter?.FullName ?? item.Company?.Recruiter?.UserName ?? "N/A")
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border px-2 py-1">
+                                        @item.JobType
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-muted">
+                                    @(item.Location ?? "N/A")
+                                </td>
+                                <td class="py-3 px-4">
+                                    @{
+                                        var badgeClass = item.Status switch
+                                        {
+                                            JobStatus.Approved => "bg-success-subtle text-success-emphasis",
+                                            JobStatus.Rejected => "bg-danger-subtle text-danger-emphasis",
+                                            JobStatus.Closed   => "bg-secondary-subtle text-secondary-emphasis",
+                                            _                  => "bg-warning-subtle text-warning-emphasis"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass border px-2 py-1">
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-end">
+                                    <div class="d-inline-flex gap-1 flex-wrap justify-content-end">
+                                        <a asp-controller="Jobs" asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-outline-primary btn-sm">View</a>
+                                        <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-outline-secondary btn-sm">Edit</a>
+
+                                        @if (item.Status == JobStatus.Pending || item.Status == JobStatus.Rejected || item.Status == JobStatus.Closed)
+                                        {
+                                            <form asp-controller="Admin" asp-action="ApproveJob" asp-route-id="@item.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-success btn-sm"
+                                                        onclick="return confirm('Approve this job and make it visible to job seekers?')">
+                                                    @(item.Status == JobStatus.Closed ? "Reopen" : "Approve")
+                                                </button>
+                                            </form>
+                                        }
+
+                                        @if (item.Status == JobStatus.Pending || item.Status == JobStatus.Approved)
+                                        {
+                                            <form asp-controller="Admin" asp-action="RejectJob" asp-route-id="@item.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Reject this job posting?')">
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        }
+
+                                        @if (item.Status == JobStatus.Approved)
+                                        {
+                                            <form asp-controller="Admin" asp-action="CloseJob" asp-route-id="@item.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-warning btn-sm"
+                                                        onclick="return confirm('Close this job so no more applications are accepted?')">
+                                                    Close
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <a asp-controller="Jobs" asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-outline-danger btn-sm">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white border rounded-3 shadow-sm p-4">
+            <p class="lead text-muted mb-0">No jobs posted yet.</p>
+        </div>
+    }
+</div>

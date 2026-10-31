@@ -1,0 +1,114 @@
+@model Job_InternshipPortal.Models.JobApplication
+@{
+    ViewData["Title"] = "Apply for Job";
+    var existingApp = ViewBag.ExistingApplication as Job_InternshipPortal.Models.JobApplication;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            @if (existingApp != null)
+            {
+                <div class="card bg-white border border-success-subtle rounded-4 shadow-sm p-4 p-md-5 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">You Have Already Applied</h3>
+                    <p class="text-muted mb-4">
+                        You have already submitted an application for <strong>@(existingApp.Job?.Title ?? Model.Job?.Title ?? "this position")</strong> at 
+                        <strong>@(existingApp.Job?.Company?.CompanyName ?? Model.Job?.Company?.CompanyName ?? "the company")</strong> on <strong>@existingApp.AppliedDate.ToString("MMMM dd, yyyy")</strong>.
+                    </p>
+
+                    <div class="bg-light border rounded-3 p-3 mb-4 mx-auto w-100" style="max-width: 420px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small fw-semibold">Application Status:</span>
+                            @{
+                                var (statusBadge, statusText) = existingApp.Status switch
+                                {
+                                    ApplicationStatus.Selected    => ("bg-success text-white", "Selected"),
+                                    ApplicationStatus.Rejected    => ("bg-danger text-white", "Rejected"),
+                                    ApplicationStatus.Shortlisted => ("bg-warning text-dark", "Shortlisted"),
+                                    ApplicationStatus.Interview   => ("bg-info text-dark", "Interview Scheduled"),
+                                    ApplicationStatus.UnderReview => ("bg-primary-subtle text-primary border", "Under Review"),
+                                    _                             => ("bg-secondary-subtle text-secondary border", "Applied")
+                                };
+                            }
+                            <span class="badge @statusBadge px-3 py-2 fs-6">@statusText</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@existingApp.Id" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-file-earmark-person"></i> View Application Details
+                        </a>
+                        <a asp-controller="Jobs" asp-action="Index" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left"></i> Browse Other Jobs
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card bg-white border rounded-3 shadow-sm p-4">
+                    <div class="card-body">
+                        <h3 class="fw-bold text-dark mb-4">Apply for Job</h3>
+
+                        @if (Model.Job != null)
+                        {
+                            <div class="p-3 bg-light rounded-3 border mb-4">
+                                <p class="mb-1"><strong>Job Title:</strong> @Model.Job.Title</p>
+                                <p class="mb-0"><strong>Company:</strong> @(Model.Job.Company?.CompanyName ?? "Company")</p>
+                            </div>
+                        }
+
+                        <form asp-controller="JobApplications" asp-action="Create" method="post" enctype="multipart/form-data">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                            <input type="hidden" asp-for="AppliedDate" />
+                            <input type="hidden" asp-for="Status" />
+                            <input type="hidden" asp-for="ResumePath" />
+
+                            @if (Model.JobId > 0 && Model.Job != null)
+                            {
+                                <input type="hidden" asp-for="JobId" />
+                            }
+                            else
+                            {
+                                <div class="mb-3">
+                                    <label asp-for="JobId" class="form-label fw-semibold">Select Job</label>
+                                    <select asp-for="JobId" class="form-select" asp-items="ViewBag.JobId">
+                                        <option value="">-- Select Job --</option>
+                                    </select>
+                                    <span asp-validation-for="JobId" class="text-danger small"></span>
+                                </div>
+                            }
+
+                            <input type="hidden" asp-for="ApplicantId" />
+
+                            <!-- Resume Upload / Application Details -->
+                            <div class="mb-4">
+                                <label for="resumeFile" class="form-label fw-semibold">Resume / CV (PDF or DOCX)</label>
+                                <input type="file" id="resumeFile" name="resumeFile" class="form-control" accept=".pdf,.doc,.docx" />
+                                <small class="text-muted d-block mt-1">Upload your latest resume or use your default profile resume.</small>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    Submit Application
+                                </button>
+                                <a asp-controller="Jobs" asp-action="Index" class="btn btn-secondary px-4">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

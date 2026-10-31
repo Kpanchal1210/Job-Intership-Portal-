@@ -1,0 +1,83 @@
+@model Job_InternshipPortal.Models.Company
+@{
+    ViewData["Title"] = "Create Company";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card bg-white border rounded-3 shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-4">Create Company</h3>
+
+                    <form asp-controller="Companies" asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        @if (User.IsInRole(UserRoles.Admin))
+                        {
+                            <div class="mb-3">
+                                <label asp-for="RecruiterId" class="form-label fw-semibold">Company Owner (Recruiter User)</label>
+                                @if (ViewBag.Recruiters != null && ((SelectList)ViewBag.Recruiters).Any())
+                                {
+                                    <select asp-for="RecruiterId" class="form-select" asp-items="ViewBag.Recruiters">
+                                        <option value="">-- Select Recruiter / Company User --</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info py-2 small mb-2">
+                                        No unassigned recruiter users available. You can assign this profile to yourself or register a new company account.
+                                    </div>
+                                    <input type="text" class="form-control bg-light" value="Defaulting to Current Administrator" readonly />
+                                }
+                                <span asp-validation-for="RecruiterId" class="text-danger small"></span>
+                            </div>
+                        }
+
+                        <!-- Company Name -->
+                        <div class="mb-3">
+                            <label asp-for="CompanyName" class="form-label fw-semibold">Company Name</label>
+                            <input asp-for="CompanyName" class="form-control" placeholder="e.g. ABC Technologies" />
+                            <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label asp-for="Location" class="form-label fw-semibold">Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="e.g. Ahmedabad" />
+                            <span asp-validation-for="Location" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Company description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Website -->
+                        <div class="mb-4">
+                            <label asp-for="Website" class="form-label fw-semibold">Website</label>
+                            <input asp-for="Website" type="url" class="form-control" placeholder="https://example.com" />
+                            <span asp-validation-for="Website" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Create
+                            </button>
+                            <a href="@(User.IsInRole(UserRoles.Admin) ? Url.Action("Companies", "Admin") : Url.Action("Index", "Companies"))" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

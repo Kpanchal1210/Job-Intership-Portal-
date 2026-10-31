@@ -1,0 +1,133 @@
+@model Job_InternshipPortal.Models.JobApplication
+@{
+    ViewData["Title"] = "Update Application";
+    var hasInterview = Model.Interviews != null && Model.Interviews.Any();
+    var scheduledInterview = hasInterview ? Model.Interviews!.First() : null;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card bg-white border rounded-3 shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-4">Update Application Status</h3>
+
+                    @if (ViewBag.AlreadySelectedForJob != null && Model.Status != ApplicationStatus.Selected)
+                    {
+                        <div class="alert alert-warning border-0 rounded-3 shadow-sm d-flex align-items-center mb-4 p-3 gap-2">
+                            <i class="bi bi-lock-fill fs-4 text-warning"></i>
+                            <div>
+                                <div class="fw-bold text-dark">Single Placement Policy Notice</div>
+                                <div class="small text-muted">
+                                    This candidate is already selected for <strong>@ViewBag.AlreadySelectedForJob</strong>. Under the portal's single placement policy, this student cannot be marked as Selected for this job.
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == ApplicationStatus.Interview && hasInterview && scheduledInterview != null)
+                    {
+                        <div class="alert alert-info border-0 rounded-3 shadow-sm d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 gap-2">
+                            <div>
+                                <div class="fw-bold text-dark mb-1">Interview already scheduled</div>
+                                <div class="small text-muted">
+                                    Date: @scheduledInterview.InterviewDate.ToString("dd MMM yyyy, hh:mm tt")
+                                </div>
+                            </div>
+                            <a asp-controller="Interviews" asp-action="Details" asp-route-id="@scheduledInterview.Id" class="btn btn-primary btn-sm px-3">
+                                View Interview
+                            </a>
+                        </div>
+                    }
+
+                    <form asp-controller="JobApplications" asp-action="Edit" asp-route-id="@Model.Id" method="post" id="updateStatusForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="JobId" />
+                        <input type="hidden" asp-for="ApplicantId" />
+                        <input type="hidden" asp-for="ResumePath" />
+                        <input type="hidden" asp-for="AppliedDate" />
+
+                        <!-- Candidate Display -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Candidate</h6>
+                            <p class="text-dark fs-5 fw-semibold mb-0">@(Model.Applicant?.FullName ?? Model.Applicant?.UserName ?? "Candidate")</p>
+                        </div>
+
+                        <!-- Job Display -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Job</h6>
+                            <p class="text-dark fs-6 mb-0">@(Model.Job?.Title ?? "Job")</p>
+                        </div>
+
+                        <!-- Status Selection -->
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label fw-semibold">Application Status</label>
+                            <select asp-for="Status" id="statusSelect" class="form-select" asp-items="Html.GetEnumSelectList<ApplicationStatus>()">
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+
+                            <!-- Interview workflow notice -->
+                            <div id="interviewNotice" class="alert alert-primary border-0 rounded-3 small mt-3 @(Model.Status == ApplicationStatus.Interview ? "" : "d-none")">
+                                <strong>Interview Scheduling:</strong> Selecting <em>Interview</em> will redirect you to the Schedule Interview page.
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap gap-2 pt-2">
+                            <button type="submit" id="saveButton" class="btn btn-primary px-4">
+                                Save Changes
+                            </button>
+                            <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                            @if (Model.Status == ApplicationStatus.Interview && hasInterview && scheduledInterview != null)
+                            {
+                                <a asp-controller="Interviews" asp-action="Details" asp-route-id="@scheduledInterview.Id" class="btn btn-outline-info px-3">
+                                    View Interview
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusSelect = document.getElementById('statusSelect');
+            const interviewNotice = document.getElementById('interviewNotice');
+            const saveBtn = document.getElementById('saveButton');
+
+            function updateUIForStatus() {
+                const isInterview = statusSelect.value === 'Interview' || statusSelect.value === '@((int)ApplicationStatus.Interview)';
+                if (isInterview) {
+                    if (interviewNotice) interviewNotice.classList.remove('d-none');
+                    if (saveBtn) saveBtn.innerHTML = 'Proceed to Schedule Interview &rarr;';
+                } else {
+                    if (interviewNotice) interviewNotice.classList.add('d-none');
+                    if (saveBtn) saveBtn.innerHTML = 'Save Changes';
+                }
+            }
+
+            if (statusSelect) {
+                const isAlreadySelected = '@(ViewBag.AlreadySelectedForJob != null ? "true" : "false")' === 'true';
+                if (isAlreadySelected) {
+                    const selectedOpt = Array.from(statusSelect.options).find(o => o.text === 'Selected' || o.value === 'Selected' || o.value === '@((int)ApplicationStatus.Selected)');
+                    if (selectedOpt) {
+                        selectedOpt.disabled = true;
+                        selectedOpt.text = selectedOpt.text + ' (Disabled - Placed Elsewhere)';
+                    }
+                }
+
+                statusSelect.addEventListener('change', updateUIForStatus);
+                updateUIForStatus();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,85 @@
+@model Job_InternshipPortal.Models.Interview
+@{
+    ViewData["Title"] = "Edit Interview";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card bg-white border rounded-3 shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-4">Edit Interview</h3>
+
+                    <form asp-controller="Interviews" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Candidate & Job (read-only for this interview) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Candidate</label>
+                            <div class="p-3 bg-light rounded-3 border mb-2">@((ViewBag.CandidateName as string) ?? (Model.JobApplication?.Applicant?.FullName ?? Model.JobApplication?.Applicant?.UserName ?? "Candidate"))</div>
+
+                            <label class="form-label fw-semibold">Job</label>
+                            <div class="p-3 bg-light rounded-3 border">@((ViewBag.JobTitle as string) ?? (Model.JobApplication?.Job?.Title ?? "Job"))</div>
+
+                            @* Keep JobApplicationId as hidden so it is posted but not editable *@
+                            <input type="hidden" asp-for="JobApplicationId" />
+                        </div>
+
+                        <!-- Date & Time -->
+                        <div class="mb-3">
+                            <label asp-for="InterviewDate" class="form-label fw-semibold">Interview Date &amp; Time</label>
+                            <input asp-for="InterviewDate" type="datetime-local" class="form-control" value="@Model.InterviewDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="InterviewDate" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Interview Mode -->
+                        <div class="mb-3">
+                            <label asp-for="InterviewType" class="form-label fw-semibold">Interview Mode</label>
+                            <select asp-for="InterviewType" class="form-select" asp-items="Html.GetEnumSelectList<InterviewType>()">
+                            </select>
+                            <span asp-validation-for="InterviewType" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Meeting Link -->
+                        <div class="mb-3">
+                            <label asp-for="MeetingLink" class="form-label fw-semibold">Online Meeting Link (if Online)</label>
+                            <input asp-for="MeetingLink" class="form-control" />
+                            <span asp-validation-for="MeetingLink" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Location / Notes -->
+                        <div class="mb-4">
+                            <label asp-for="Location" class="form-label fw-semibold">Office Location / Notes</label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-4">
+                            <label asp-for="Status" class="form-label fw-semibold">Interview Status</label>
+                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<InterviewStatus>()">
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Save Changes
+                            </button>
+                            <a asp-controller="Interviews" asp-action="Index" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

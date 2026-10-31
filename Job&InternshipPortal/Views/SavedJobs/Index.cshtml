@@ -1,0 +1,58 @@
+@model IEnumerable<Job_InternshipPortal.Models.SavedJob>
+@{
+    ViewData["Title"] = "My Saved Jobs";
+}
+
+<div class="container py-4">
+    <!-- Heading -->
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark">My Saved Jobs</h2>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 bg-white border rounded-3 shadow-sm p-3">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-dark mb-1">
+                                @(item.Job?.Title ?? "Job")
+                            </h5>
+                            <p class="text-secondary fw-semibold mb-1">
+                                @(item.Job?.Company?.CompanyName ?? "Company")
+                            </p>
+                            <p class="text-muted small mb-1">
+                                @(item.Job?.Location ?? "Not Specified")
+                            </p>
+                            @if (item.Job != null)
+                            {
+                                <p class="text-muted small mb-3">
+                                    @(item.Job.JobType == JobType.FullTime ? "Full Time" : item.Job.JobType == JobType.PartTime ? "Part Time" : "Internship")
+                                </p>
+                            }
+                            <div class="mt-auto pt-3 border-top d-flex gap-2">
+                                <a asp-controller="Jobs" asp-action="Details" asp-route-id="@item.JobId" class="btn btn-outline-primary btn-sm flex-fill">
+                                    View Job
+                                </a>
+                                <a asp-controller="SavedJobs" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm flex-fill">
+                                    Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white border rounded-3 shadow-sm p-4">
+            <p class="lead text-muted mb-4">You haven't saved any jobs yet.</p>
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary px-4">
+                Browse Jobs
+            </a>
+        </div>
+    }
+</div>

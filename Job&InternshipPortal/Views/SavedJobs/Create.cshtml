@@ -1,0 +1,68 @@
+@model Job_InternshipPortal.Models.SavedJob
+@{
+    ViewData["Title"] = "Save Job";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card bg-white border rounded-3 shadow-sm p-4 text-center">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-3">Save Job</h3>
+                    
+                    @if (Model.Job != null)
+                    {
+                        <div class="p-3 bg-light rounded-3 border mb-4 text-start">
+                            <h5 class="fw-bold text-dark mb-1">@Model.Job.Title</h5>
+                            <p class="text-secondary small mb-0">
+                                <i class="bi bi-building"></i> @(Model.Job.Company?.CompanyName ?? "Company")
+                                &bull; <i class="bi bi-geo-alt"></i> @(Model.Job.Location ?? "Not Specified")
+                            </p>
+                        </div>
+                        <p class="text-muted mb-4">Would you like to save this job to your saved jobs list?</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-4">Select a job below to save it to your saved jobs list.</p>
+                    }
+
+                    <form asp-controller="SavedJobs" asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        <input type="hidden" asp-for="SavedDate" />
+
+                        @if (Model.JobId > 0)
+                        {
+                            <input type="hidden" asp-for="JobId" />
+                        }
+                        else
+                        {
+                            <div class="mb-3 text-start">
+                                <label asp-for="JobId" class="form-label fw-semibold">Select Job</label>
+                                <select asp-for="JobId" class="form-select" asp-items="ViewBag.JobId">
+                                    <option value="">-- Select Job --</option>
+                                </select>
+                                <span asp-validation-for="JobId" class="text-danger small"></span>
+                            </div>
+                        }
+
+                        <input type="hidden" asp-for="ApplicantId" />
+
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Save Job
+                            </button>
+                            <a asp-controller="Jobs" asp-action="Index" class="btn btn-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

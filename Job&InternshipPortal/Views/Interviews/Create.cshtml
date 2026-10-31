@@ -1,0 +1,167 @@
+@model Job_InternshipPortal.Models.Interview
+@{
+    ViewData["Title"] = "Schedule Interview";
+    var hasPreselectedApp = Model.JobApplicationId > 0;
+    var candidateName = Model.JobApplication?.Applicant?.FullName ?? Model.JobApplication?.Applicant?.UserName ?? (ViewBag.CandidateName as string);
+    var jobTitle = Model.JobApplication?.Job?.Title ?? (ViewBag.JobTitle as string);
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card bg-white border rounded-3 shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="fw-bold text-dark mb-4">Schedule Interview</h3>
+
+                    <form asp-controller="Interviews" asp-action="Create" method="post" id="scheduleInterviewForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        @if (hasPreselectedApp && (!string.IsNullOrEmpty(candidateName) || !string.IsNullOrEmpty(jobTitle)))
+                        {
+                            <input type="hidden" asp-for="JobApplicationId" />
+
+                            <!-- Candidate -->
+                            <div class="mb-3">
+                                <label class="form-label text-secondary text-uppercase small fw-bold mb-1">Candidate</label>
+                                <div class="p-2 px-3 bg-light border rounded text-dark fs-6 fw-semibold">
+                                    @(candidateName ?? "Candidate")
+                                </div>
+                            </div>
+
+                            <!-- Job -->
+                            <div class="mb-3">
+                                <label class="form-label text-secondary text-uppercase small fw-bold mb-1">Job</label>
+                                <div class="p-2 px-3 bg-light border rounded text-dark fs-6">
+                                    @(jobTitle ?? "Job")
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Application Selection Dropdown if not preselected -->
+                            <div class="mb-3">
+                                <label asp-for="JobApplicationId" class="form-label fw-semibold">Candidate Application &amp; Job</label>
+                                <select asp-for="JobApplicationId" class="form-select" asp-items="ViewBag.JobApplicationId">
+                                    <option value="">-- Select Candidate &amp; Job --</option>
+                                </select>
+                                <span asp-validation-for="JobApplicationId" class="text-danger small"></span>
+                            </div>
+                        }
+
+                        <!-- Hidden bound InterviewDate -->
+                        <input type="hidden" asp-for="InterviewDate" id="interviewDateHidden" value="@Model.InterviewDate.ToString("yyyy-MM-ddTHH:mm")" />
+
+                        <!-- Interview Date -->
+                        <div class="mb-3">
+                            <label for="interviewDateOnly" class="form-label fw-semibold">Interview Date</label>
+                            <input type="date" id="interviewDateOnly" class="form-control" value="@Model.InterviewDate.ToString("yyyy-MM-dd")" required />
+                            <span asp-validation-for="InterviewDate" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Interview Time -->
+                        <div class="mb-3">
+                            <label for="interviewTimeOnly" class="form-label fw-semibold">Interview Time</label>
+                            <input type="time" id="interviewTimeOnly" class="form-control" value="@Model.InterviewDate.ToString("HH:mm")" required />
+                        </div>
+
+                        <!-- Interview Mode -->
+                        <div class="mb-3">
+                            <label asp-for="InterviewType" class="form-label fw-semibold">Interview Mode</label>
+                            <select asp-for="InterviewType" id="interviewModeSelect" class="form-select" asp-items="Html.GetEnumSelectList<InterviewType>()">
+                            </select>
+                            <span asp-validation-for="InterviewType" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Interview Link / Location Container -->
+                        <div class="mb-3" id="meetingLinkContainer">
+                            <label asp-for="MeetingLink" id="linkLocationLabel" class="form-label fw-semibold">Interview Link / Location</label>
+                            <input asp-for="MeetingLink" id="meetingLinkInput" class="form-control" placeholder="https://meet.google.com/... or Teams link" />
+                            <span asp-validation-for="MeetingLink" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3 d-none" id="locationContainer">
+                            <label asp-for="Location" class="form-label fw-semibold">Interview Link / Location</label>
+                            <input asp-for="Location" id="locationInput" class="form-control" placeholder="Office address, floor, or room number" />
+                            <span asp-validation-for="Location" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notesInput" class="form-label fw-semibold">Notes</label>
+                            <textarea id="notesInput" name="notes" class="form-control" rows="3" placeholder="Candidate instructions, topics to prepare, or round details"></textarea>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex flex-wrap gap-2 pt-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Schedule Interview
+                            </button>
+                            @if (hasPreselectedApp)
+                            {
+                                <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@Model.JobApplicationId" class="btn btn-secondary px-4">
+                                    Cancel
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Interviews" asp-action="Index" class="btn btn-secondary px-4">
+                                    Cancel
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('interviewDateOnly');
+            const timeInput = document.getElementById('interviewTimeOnly');
+            const hiddenDate = document.getElementById('interviewDateHidden');
+            const modeSelect = document.getElementById('interviewModeSelect');
+            const meetingLinkContainer = document.getElementById('meetingLinkContainer');
+            const locationContainer = document.getElementById('locationContainer');
+            const form = document.getElementById('scheduleInterviewForm');
+
+            function syncDateTime() {
+                const d = dateInput.value;
+                const t = timeInput.value || '10:00';
+                if (d) {
+                    hiddenDate.value = `${d}T${t}`;
+                }
+            }
+
+            dateInput.addEventListener('change', syncDateTime);
+            timeInput.addEventListener('change', syncDateTime);
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    syncDateTime();
+                });
+            }
+
+            function updateModeUI() {
+                // Online = 0, Offline = 1 (or string "Online" / "Offline")
+                const val = modeSelect.value;
+                const isOffline = val === '1' || val === 'Offline';
+                if (isOffline) {
+                    meetingLinkContainer.classList.add('d-none');
+                    locationContainer.classList.remove('d-none');
+                } else {
+                    meetingLinkContainer.classList.remove('d-none');
+                    locationContainer.classList.add('d-none');
+                }
+            }
+
+            if (modeSelect) {
+                modeSelect.addEventListener('change', updateModeUI);
+                updateModeUI();
+            }
+        });
+    </script>
+}

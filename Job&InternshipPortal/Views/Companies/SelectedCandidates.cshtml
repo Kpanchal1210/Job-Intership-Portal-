@@ -1,0 +1,167 @@
+@model IEnumerable<Job_InternshipPortal.Models.JobApplication>
+@using Job_InternshipPortal.Models
+@{
+    ViewData["Title"] = "Selected Candidates";
+    var selectedJobId = ViewBag.SelectedJobId as int?;
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success-subtle text-success-emphasis border fw-bold px-2 py-1">
+                    <i class="bi bi-check-circle-fill"></i> Placements &amp; Hires
+                </span>
+            </div>
+            <h2 class="fw-bold text-dark mb-0">Selected Candidates</h2>
+            <p class="text-muted small mb-0">Candidates successfully chosen and hired for positions at your company.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Companies" asp-action="ShortlistedApplicants" class="btn btn-outline-warning btn-sm text-dark">
+                <i class="bi bi-star"></i> View Shortlisted
+            </a>
+            <a asp-controller="Companies" asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter by Job Card -->
+    <div class="card border-0 shadow-sm rounded-3 bg-white p-3 mb-4">
+        <form asp-controller="Companies" asp-action="SelectedCandidates" method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <label class="form-label small fw-semibold text-secondary mb-1">Filter by Job Posting</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-briefcase text-muted"></i></span>
+                    <select name="jobId" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- All Company Jobs --</option>
+                        @if (ViewBag.Jobs != null)
+                        {
+                            foreach (var item in (SelectList)ViewBag.Jobs)
+                            {
+                                <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm px-3 mt-md-4">
+                    <i class="bi bi-funnel"></i> Apply Filter
+                </button>
+                @if (selectedJobId.HasValue && selectedJobId.Value > 0)
+                {
+                    <a asp-controller="Companies" asp-action="SelectedCandidates" class="btn btn-outline-secondary btn-sm mt-md-4">
+                        Clear Filter
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- Selected Candidates Table -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light border-bottom">
+                        <tr>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary">Candidate</th>
+                            <th scope="col" class="py-3 px-3 fw-semibold text-secondary">Job Title</th>
+                            <th scope="col" class="py-3 px-3 fw-semibold text-secondary">Applied Date</th>
+                            <th scope="col" class="py-3 px-3 fw-semibold text-secondary">Selection Date</th>
+                            <th scope="col" class="py-3 px-3 fw-semibold text-secondary">Status</th>
+                            <th scope="col" class="py-3 px-3 fw-semibold text-secondary">Resume</th>
+                            <th scope="col" class="py-3 px-4 fw-semibold text-secondary text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var candidateName = item.Applicant?.FullName ?? item.Applicant?.UserName ?? "Candidate";
+                            var jobTitle = item.Job?.Title ?? "Position";
+
+                            <tr>
+                                <td class="py-3 px-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle bg-success-subtle text-success fw-bold d-inline-flex align-items-center justify-content-center rounded-circle" style="width:36px; height:36px;">
+                                            @(candidateName.Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@candidateName</div>
+                                            <div class="small text-muted">@(item.Applicant?.Email ?? "")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-3">
+                                    <div class="fw-semibold text-dark">@jobTitle</div>
+                                    <div class="small text-muted">@(item.Job?.JobType.ToString() ?? "Full Time")</div>
+                                </td>
+                                <td class="py-3 px-3 text-muted">
+                                    @item.AppliedDate.ToLocalTime().ToString("MMM d, yyyy")
+                                </td>
+                                <td class="py-3 px-3">
+                                    @if (item.SelectedDate.HasValue)
+                                    {
+                                        <span class="text-success fw-semibold">
+                                            <i class="bi bi-calendar-check"></i> @item.SelectedDate.Value.ToLocalTime().ToString("MMM d, yyyy")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                                <td class="py-3 px-3">
+                                    <span class="badge bg-success-subtle text-success-emphasis border px-2 py-1">
+                                        <i class="bi bi-check-circle-fill"></i> Selected
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3">
+                                    @if (!string.IsNullOrEmpty(item.ResumePath))
+                                    {
+                                        <a href="@item.ResumePath" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm" title="View Resume">
+                                            <i class="bi bi-file-earmark-pdf text-danger"></i> Resume
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">N/A</span>
+                                    }
+                                </td>
+                                <td class="py-3 px-4 text-end">
+                                    <a asp-controller="JobApplications" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-5 text-center">
+            <div class="mx-auto mb-3" style="font-size:3rem; color: #10b981;">
+                <i class="bi bi-trophy"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">No Candidates Selected Yet</h4>
+            <p class="text-muted small mb-4" style="max-width: 500px; margin: 0 auto;">
+                You haven't made any final selections@(selectedJobId.HasValue ? " for this job" : "") yet. Review your shortlisted candidates and click "Select Candidate" to confirm hires.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <a asp-controller="Companies" asp-action="ShortlistedApplicants" class="btn btn-primary btn-sm px-4">
+                    <i class="bi bi-star"></i> View Shortlisted Applicants
+                </a>
+                <a asp-controller="Companies" asp-action="Dashboard" class="btn btn-outline-secondary btn-sm px-4">
+                    <i class="bi bi-speedometer2"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    }
+</div>
+

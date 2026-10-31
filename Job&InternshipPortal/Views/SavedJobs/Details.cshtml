@@ -1,0 +1,107 @@
+@model Job_InternshipPortal.Models.SavedJob
+@{
+    ViewData["Title"] = "Saved Job Details";
+    var job = Model.Job;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark mb-0">Saved Job Details</h2>
+                <a asp-controller="SavedJobs" asp-action="Index" class="btn btn-outline-secondary">
+                    &larr; My Saved Jobs
+                </a>
+            </div>
+
+            @if (job != null)
+            {
+                <div class="card bg-white border rounded-3 shadow-sm p-4 mb-3">
+                    <div class="mb-3">
+                        <h3 class="fw-bold text-dark mb-1">@job.Title</h3>
+                        <p class="text-secondary fw-semibold mb-0">@(job.Company?.CompanyName ?? "Company")</p>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Job Type</p>
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis border px-2 py-1">
+                                @(job.JobType == JobType.FullTime ? "Full Time" : job.JobType == JobType.PartTime ? "Part Time" : "Internship")
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Location</p>
+                            <p class="mb-0">@(job.Location ?? "Not Specified")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Salary</p>
+                            <p class="mb-0">@(job.Salary.HasValue ? "$" + job.Salary.Value.ToString("N0") : "Negotiable")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Application Deadline</p>
+                            <p class="mb-0">@job.LastDate.ToString("MMMM d, yyyy")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Status</p>
+                            @{
+                                var badgeClass = job.Status switch
+                                {
+                                    JobStatus.Approved => "bg-success-subtle text-success-emphasis",
+                                    JobStatus.Closed   => "bg-secondary-subtle text-secondary-emphasis",
+                                    JobStatus.Rejected => "bg-danger-subtle text-danger-emphasis",
+                                    _                  => "bg-warning-subtle text-warning-emphasis"
+                                };
+                            }
+                            <span class="badge @badgeClass border px-2 py-1">@job.Status</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Saved On</p>
+                            <p class="mb-0">@Model.SavedDate.ToLocalTime().ToString("MMMM d, yyyy")</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(job.Description))
+                    {
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Description</p>
+                            <p class="mb-0" style="white-space: pre-line;">@job.Description</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(job.Requirements))
+                    {
+                        <div class="mb-4">
+                            <p class="text-muted small mb-1 fw-semibold text-uppercase">Requirements</p>
+                            <p class="mb-0" style="white-space: pre-line;">@job.Requirements</p>
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2 pt-3 border-top flex-wrap">
+                        <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id"
+                           class="btn btn-primary">
+                            View Full Job Listing
+                        </a>
+                        @if (job.Status == JobStatus.Approved)
+                        {
+                            <a asp-controller="JobApplications" asp-action="Create" asp-route-jobId="@job.Id"
+                               class="btn btn-success">
+                                Apply Now
+                            </a>
+                        }
+                        <a asp-controller="SavedJobs" asp-action="Delete" asp-route-id="@Model.Id"
+                           class="btn btn-outline-danger">
+                            Remove from Saved
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    The job details could not be loaded.
+                    <a asp-controller="SavedJobs" asp-action="Index" class="alert-link">Go back to saved jobs.</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

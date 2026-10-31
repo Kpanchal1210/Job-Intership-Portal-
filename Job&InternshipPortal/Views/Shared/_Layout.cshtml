@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Job &amp; Internship Portal</title>
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+    <!-- Main Header & Modern Navigation -->
+    <header>
+        <nav class="navbar navbar-expand-lg portal-navbar shadow-sm">
+            <div class="container-fluid px-3 px-xl-5">
+                <a class="portal-brand me-3" asp-area=""
+                   asp-controller="@(User.IsInRole(UserRoles.Admin) ? "Admin" : User.IsInRole(UserRoles.Recruiter) ? "Companies" : User.IsInRole(UserRoles.JobSeeker) ? "JobApplications" : "Home")"
+                   asp-action="@(User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Recruiter) || User.IsInRole(UserRoles.JobSeeker) ? "Dashboard" : "Index")">
+                    <span class="brand-icon"><i class="bi bi-briefcase-fill"></i></span>
+                    <span>Job<span class="brand-text-accent">&amp;Internship</span></span>
+                </a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav portal-nav me-auto mb-2 mb-lg-0">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            @if (User.IsInRole(UserRoles.Admin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Jobs"><i class="bi bi-briefcase"></i> Jobs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Companies"><i class="bi bi-buildings"></i> Companies</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Applications"><i class="bi bi-file-earmark-text"></i> Applications</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Users"><i class="bi bi-people"></i> Users</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Interviews" asp-action="Index"><i class="bi bi-calendar-check"></i> Interviews</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Company") || User.IsInRole("Recruiter") || User.IsInRole(UserRoles.Recruiter))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Companies" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Jobs" asp-action="Index"><i class="bi bi-briefcase"></i> My Jobs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="JobApplications" asp-action="Index"><i class="bi bi-file-earmark-person"></i> Applications</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Companies" asp-action="ShortlistedApplicants"><i class="bi bi-star"></i> Shortlisted</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Companies" asp-action="SelectedCandidates"><i class="bi bi-check-circle"></i> Selected</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Interviews" asp-action="Index"><i class="bi bi-calendar-check"></i> Interviews</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="JobApplications" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Jobs" asp-action="Index"><i class="bi bi-search"></i> Find Jobs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Companies" asp-action="Index"><i class="bi bi-buildings"></i> Companies</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="JobApplications" asp-action="Index"><i class="bi bi-file-earmark-check"></i> My Applications</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Interviews" asp-action="Index"><i class="bi bi-calendar-event"></i> Interviews</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="SavedJobs" asp-action="Index"><i class="bi bi-bookmark-heart"></i> Saved</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i> Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Jobs" asp-action="Index"><i class="bi bi-briefcase"></i> Jobs &amp; Internships</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Companies" asp-action="Index"><i class="bi bi-buildings"></i> Companies</a>
+                            </li>
+                        }
+                    </ul>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle d-inline-flex align-items-center gap-2 py-1 px-3 rounded-pill bg-white shadow-sm"
+                                        type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle text-primary fs-6"></i>
+                                    <span class="fw-semibold text-dark">@(User.Identity.Name?.Split('@')[0] ?? "User")</span>
+                                    <span class="badge bg-primary-subtle text-primary border-0 small">
+                                        @(User.IsInRole(UserRoles.Admin) ? "Admin" : User.IsInRole(UserRoles.Recruiter) ? "Company" : "Job Seeker")
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3" aria-labelledby="userMenuDropdown" style="min-width: 220px;">
+                                    <li class="px-3 py-2 border-bottom">
+                                        <div class="fw-bold text-dark small text-truncate">@(User.Identity.Name)</div>
+                                        <div class="text-muted small">
+                                            @(User.IsInRole(UserRoles.Admin) ? "System Administrator" : User.IsInRole(UserRoles.Recruiter) ? "Company" : "Job Seeker")
+                                        </div>
+                                    </li>
+                                    @if (User.IsInRole(UserRoles.Recruiter))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="Companies" asp-action="Dashboard">
+                                                <i class="bi bi-speedometer2 me-2 text-primary"></i> Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="Companies" asp-action="Index">
+                                                <i class="bi bi-building me-2 text-secondary"></i> Company Profile
+                                            </a>
+                                        </li>
+                                    }
+                                    else if (User.IsInRole(UserRoles.JobSeeker))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="JobApplications" asp-action="Dashboard">
+                                                <i class="bi bi-speedometer2 me-2 text-primary"></i> Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="JobApplications" asp-action="Index">
+                                                <i class="bi bi-file-earmark-check me-2 text-secondary"></i> My Applications
+                                            </a>
+                                        </li>
+                                    }
+                                    else if (User.IsInRole(UserRoles.Admin))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="Admin" asp-action="Dashboard">
+                                                <i class="bi bi-shield-check me-2 text-primary"></i> Admin Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="Admin" asp-action="Jobs">
+                                                <i class="bi bi-briefcase me-2 text-secondary"></i> Manage Jobs
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 small" asp-controller="Admin" asp-action="Users">
+                                                <i class="bi bi-people me-2 text-secondary"></i> Manage Users
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="px-2 py-1">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="portal-nav-btn btn-portal-outline" asp-area="" asp-controller="Account" asp-action="Login">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                            <a class="portal-nav-btn btn-portal-primary" asp-area="" asp-controller="Account" asp-action="Register">
+                                <i class="bi bi-person-plus-fill"></i> Register
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="flex-grow-1">
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <div>@TempData["Success"]</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                    <div>@TempData["Error"]</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-info alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
+                    <i class="bi bi-info-circle-fill fs-5"></i>
+                    <div>@TempData["Info"]</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <!-- Modern Global Portal Footer -->
+    <footer class="portal-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-12 col-md-5">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="brand-icon" style="width:36px; height:36px; font-size:1rem;"><i class="bi bi-briefcase-fill text-white"></i></span>
+                        <h4 class="fw-bold text-white mb-0">Job &amp; Internship Portal</h4>
+                    </div>
+                    <p class="text-secondary small mb-3" style="max-width: 420px; line-height: 1.6;">
+                        A centralized platform empowering students and job seekers to land their dream roles, while enabling verified companies and recruiters to discover top talent with streamlined applications and interview scheduling.
+                    </p>
+                    <div class="d-flex gap-2 text-secondary small">
+                        <span class="badge bg-dark border text-light"><i class="bi bi-shield-check text-success"></i> Verified Companies</span>
+                        <span class="badge bg-dark border text-light"><i class="bi bi-clock-history text-info"></i> Real-Time Tracking</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2">
+                    <h5>For Candidates</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Jobs" asp-action="Index"><i class="bi bi-chevron-right small"></i> Browse Jobs</a></li>
+                        <li><a asp-controller="Jobs" asp-action="Index" asp-route-jobType="@JobType.Internship"><i class="bi bi-chevron-right small"></i> Internships</a></li>
+                        <li><a asp-controller="Companies" asp-action="Index"><i class="bi bi-chevron-right small"></i> Top Companies</a></li>
+                        <li><a asp-controller="Account" asp-action="Register"><i class="bi bi-chevron-right small"></i> Candidate Signup</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2">
+                    <h5>For Employers</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Jobs" asp-action="Create"><i class="bi bi-chevron-right small"></i> Post a Job</a></li>
+                        <li><a asp-controller="Companies" asp-action="Index"><i class="bi bi-chevron-right small"></i> Company Directory</a></li>
+                        <li><a asp-controller="Account" asp-action="Register"><i class="bi bi-chevron-right small"></i> Company Signup</a></li>
+                        <li><a asp-controller="Account" asp-action="Login"><i class="bi bi-chevron-right small"></i> Company Login</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-3 col-lg-3">
+                    <h5>System &amp; Administration</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-chevron-right small"></i> Admin Portal</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy"><i class="bi bi-chevron-right small"></i> Privacy Policy</a></li>
+                        <li><a asp-controller="Home" asp-action="Index"><i class="bi bi-chevron-right small"></i> Platform Overview</a></li>
+                        <li><a asp-controller="Account" asp-action="Login"><i class="bi bi-chevron-right small"></i> Member Sign In</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                <p class="mb-0 text-secondary">&copy; @DateTime.UtcNow.Year Job &amp; Internship Portal. All rights reserved.</p>
+                <div class="d-flex gap-3 text-secondary small">
+                    <span>Designed for students, recruiters, and administrators.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

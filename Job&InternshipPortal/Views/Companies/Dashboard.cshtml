@@ -1,0 +1,331 @@
+@model Job_InternshipPortal.Models.ViewModels.RecruiterDashboardViewModel
+@using Job_InternshipPortal.Models
+@{
+    ViewData["Title"] = "Company Dashboard";
+}
+
+<div class="container py-4">
+
+    @* ── Welcome Banner ─────────────────────────────────────────────────────── *@
+    <div class="card border-0 bg-primary text-white rounded-3 shadow-sm mb-4 p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h2 class="h3 fw-bold mb-1">Welcome, @Model.RecruiterName!</h2>
+                <p class="mb-0 opacity-75">
+                    Managing <strong>@Model.CompanyName</strong> &mdash; review applicants, schedule interviews, and manage jobs.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-controller="Jobs" asp-action="Create" class="btn btn-light text-primary fw-semibold">
+                    <i class="bi bi-plus-lg"></i> Post New Job
+                </a>
+                <a asp-controller="JobApplications" asp-action="Index" class="btn btn-outline-light">
+                    Applications
+                </a>
+                @if (Model.CompanyId.HasValue)
+                {
+                    <a asp-controller="Companies" asp-action="Edit" asp-route-id="@Model.CompanyId" class="btn btn-outline-light">
+                        Profile
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ── Clean, Simplified Key Metrics ─────────────────────────────────────── *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="Jobs" asp-action="Index" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-primary mb-1">@Model.TotalJobsPosted</div>
+                    <div class="text-muted small fw-semibold">Jobs Posted</div>
+                    <div class="text-success small mt-1">@Model.ActiveJobs Active</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="JobApplications" asp-action="Index" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-dark mb-1">@Model.TotalApplicationsReceived</div>
+                    <div class="text-muted small fw-semibold">Total Applications</div>
+                    <div class="text-secondary small mt-1">@Model.ApplicationsAwaitingReview New Applied</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="JobApplications" asp-action="Index" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-info mb-1">@Model.ApplicationsUnderReview</div>
+                    <div class="text-muted small fw-semibold">Under Review</div>
+                    <div class="text-secondary small mt-1">Evaluating</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="Companies" asp-action="ShortlistedApplicants" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-warning mb-1">@Model.ShortlistedApplicants</div>
+                    <div class="text-muted small fw-semibold">Shortlisted</div>
+                    <div class="text-secondary small mt-1">Candidates</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="Companies" asp-action="SelectedCandidates" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-success mb-1">@Model.SelectedCandidates</div>
+                    <div class="text-muted small fw-semibold">Selected</div>
+                    <div class="text-secondary small mt-1">Final Hires</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <a asp-controller="Interviews" asp-action="Index" class="text-decoration-none">
+                <div class="card border bg-white shadow-sm h-100 rounded-3 p-3 text-center">
+                    <div class="h3 fw-bold text-primary mb-1">@Model.UpcomingInterviewCount</div>
+                    <div class="text-muted small fw-semibold">Interviews</div>
+                    <div class="text-secondary small mt-1">Scheduled</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        @* ── Main Column ─────────────────────────────────────────────────────── *@
+        <div class="col-12 col-xl-8">
+
+            @* My Recent Job Listings *@
+            <div class="card border shadow-sm rounded-3 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-3 px-md-4">
+                    <h5 class="mb-0 fw-bold">Recent Job Listings</h5>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary btn-sm">+ Post Job</a>
+                        <a asp-controller="Jobs" asp-action="Index" class="btn btn-outline-secondary btn-sm">View All</a>
+                    </div>
+                </div>
+                @if (Model.RecentJobs.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Title</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Posted</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Status</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small text-center">Applicants</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary text-end small">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var job in Model.RecentJobs)
+                                {
+                                    var (sbg, sfg) = job.Status switch
+                                    {
+                                        JobStatus.Approved => ("bg-success-subtle", "text-success-emphasis"),
+                                        JobStatus.Rejected => ("bg-danger-subtle",  "text-danger-emphasis"),
+                                        JobStatus.Closed   => ("bg-secondary-subtle","text-secondary-emphasis"),
+                                        _                  => ("bg-warning-subtle",  "text-warning-emphasis")
+                                    };
+
+                                    <tr>
+                                        <td class="px-3 py-2 fw-semibold">
+                                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id"
+                                               class="text-decoration-none text-dark">@job.Title</a>
+                                        </td>
+                                        <td class="px-3 py-2 text-muted small">@job.CreatedDate.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                        <td class="px-3 py-2">
+                                            <span class="badge @sbg @sfg border px-2 py-1">@job.Status</span>
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="badge bg-light text-primary border text-decoration-none px-2 py-1">
+                                                @(job.JobApplications?.Count ?? 0)
+                                            </a>
+                                        </td>
+                                        <td class="px-3 py-2 text-end">
+                                            <div class="d-inline-flex gap-1 justify-content-end">
+                                                <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id"
+                                                   class="btn btn-outline-secondary btn-sm py-1 px-2">View</a>
+                                                <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@job.Id"
+                                                   class="btn btn-outline-secondary btn-sm py-1 px-2">Edit</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-2">No jobs posted yet.</p>
+                        <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary btn-sm">Post Your First Job</a>
+                    </div>
+                }
+            </div>
+
+            @* Recent Applicants *@
+            <div class="card border shadow-sm rounded-3 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-3 px-md-4">
+                    <h5 class="mb-0 fw-bold">Recent Applicants</h5>
+                    <a asp-controller="JobApplications" asp-action="Index" class="btn btn-outline-secondary btn-sm">View All</a>
+                </div>
+                @if (Model.RecentApplicants.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Applicant</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Job</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Applied</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Status</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary text-end small">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var app in Model.RecentApplicants)
+                                {
+                                    var (abg, afg) = app.Status switch
+                                    {
+                                        ApplicationStatus.Selected    => ("bg-success", "text-white"),
+                                        ApplicationStatus.Rejected    => ("bg-danger-subtle", "text-danger"),
+                                        ApplicationStatus.Shortlisted => ("bg-warning text-dark", ""),
+                                        ApplicationStatus.Interview   => ("bg-info text-dark", ""),
+                                        ApplicationStatus.UnderReview => ("bg-primary-subtle", "text-primary"),
+                                        _                             => ("bg-secondary-subtle","text-secondary")
+                                    };
+
+                                    <tr>
+                                        <td class="px-3 py-2 fw-semibold text-dark">
+                                            @(app.Applicant?.FullName ?? app.Applicant?.UserName ?? "Applicant")
+                                        </td>
+                                        <td class="px-3 py-2 text-muted small">@(app.Job?.Title ?? "—")</td>
+                                        <td class="px-3 py-2 text-muted small">@app.AppliedDate.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                        <td class="px-3 py-2">
+                                            <span class="badge @abg @afg px-2 py-1">@app.Status</span>
+                                        </td>
+                                        <td class="px-3 py-2 text-end">
+                                            <a asp-controller="JobApplications" asp-action="Details"
+                                               asp-route-id="@app.Id"
+                                               class="btn btn-outline-secondary btn-sm py-1 px-2">Details</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No applications received yet.</p>
+                    </div>
+                }
+            </div>
+
+            @* Upcoming Interviews *@
+            <div class="card border shadow-sm rounded-3 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-3 px-md-4">
+                    <h5 class="mb-0 fw-bold">Upcoming Interviews</h5>
+                    <a asp-controller="Interviews" asp-action="Index" class="btn btn-outline-secondary btn-sm">View All</a>
+                </div>
+                @if (Model.UpcomingInterviews.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Applicant</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Job</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Date &amp; Time</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary small">Type</th>
+                                    <th class="px-3 py-2 fw-semibold text-secondary text-end small">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var iv in Model.UpcomingInterviews)
+                                {
+                                    <tr>
+                                        <td class="px-3 py-2 fw-semibold text-dark">
+                                            @(iv.JobApplication?.Applicant?.FullName ?? iv.JobApplication?.Applicant?.UserName ?? "—")
+                                        </td>
+                                        <td class="px-3 py-2 text-muted small">@(iv.JobApplication?.Job?.Title ?? "—")</td>
+                                        <td class="px-3 py-2 text-muted small">@iv.InterviewDate.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                                        <td class="px-3 py-2">
+                                            <span class="badge bg-light text-dark border px-2 py-1">@iv.InterviewType</span>
+                                        </td>
+                                        <td class="px-3 py-2 text-end">
+                                            <a asp-controller="Interviews" asp-action="Details"
+                                               asp-route-id="@iv.Id"
+                                               class="btn btn-outline-secondary btn-sm py-1 px-2">Details</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No upcoming interviews scheduled.</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        @* ── Sidebar Column ─────────────────────────────────────────────────── *@
+        <div class="col-12 col-xl-4">
+
+            @* Quick Links *@
+            <div class="card border shadow-sm rounded-3 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="mb-0 fw-bold">Candidate Pipeline</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Companies" asp-action="ShortlistedApplicants" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3">
+                        <div>
+                            <i class="bi bi-star text-warning me-2"></i> Shortlisted Applicants
+                        </div>
+                        <span class="badge bg-warning text-dark">@Model.ShortlistedApplicants</span>
+                    </a>
+                    <a asp-controller="Companies" asp-action="SelectedCandidates" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3">
+                        <div>
+                            <i class="bi bi-check-circle text-success me-2"></i> Selected Candidates
+                        </div>
+                        <span class="badge bg-success">@Model.SelectedCandidates</span>
+                    </a>
+                    <a asp-controller="JobApplications" asp-action="Index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3">
+                        <div>
+                            <i class="bi bi-file-earmark-person text-primary me-2"></i> All Applications
+                        </div>
+                        <span class="badge bg-secondary">@Model.TotalApplicationsReceived</span>
+                    </a>
+                    <a asp-controller="Interviews" asp-action="Index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3">
+                        <div>
+                            <i class="bi bi-calendar-event text-info me-2"></i> Interview Schedule
+                        </div>
+                        <span class="badge bg-info text-dark">@Model.UpcomingInterviewCount</span>
+                    </a>
+                </div>
+            </div>
+
+            @* Company Quick Profile *@
+            <div class="card border shadow-sm rounded-3 mb-4 bg-white p-4">
+                <h6 class="fw-bold mb-2">@Model.CompanyName</h6>
+                <p class="text-muted small mb-3">Recruiter dashboard for reviewing candidates, managing company postings, and organizing hiring workflows.</p>
+                <div class="d-grid gap-2">
+                    <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary btn-sm">+ Post New Job</a>
+                    @if (Model.CompanyId.HasValue)
+                    {
+                        <a asp-controller="Companies" asp-action="Edit" asp-route-id="@Model.CompanyId" class="btn btn-outline-secondary btn-sm">Edit Company Profile</a>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
